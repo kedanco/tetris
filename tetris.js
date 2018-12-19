@@ -1,9 +1,108 @@
 const canvas = document.getElementById("tetris");
 const context = canvas.getContext("2d");
-
 context.scale(20, 20);
 
+let difficulty = "easy";
+let gameStart = false;
+
+let click = new Audio("./sounds/Sound Effect - Mouse Click.mp3");
+let hover = new Audio("./sounds/166186__drminky__menu-screen-mouse-over.wav");
+let tetrisMusic = new Audio("./sounds/Tetris Theme (Dubstep Remix).mp3");
+
 const matrix = [[0, 0, 0], [1, 1, 1], [0, 1, 0]];
+
+const colors = [
+	null,
+	"#FF0D72",
+	"#0DC2FF",
+	"#0DFF72",
+	"#F538FF",
+	"#FF8E0D",
+	"#FFE138",
+	"#3877FF"
+];
+let dropCounter = 0;
+let lastTime = 0;
+let dropInterval = 1000;
+
+getDifficulty();
+
+// let dropInterval be determined by difficulty
+
+const arena = createMatrix(12, 20);
+
+const player = {
+	pos: { x: 5, y: 5 },
+	matrix: createPiece("T"),
+	score: 0
+};
+
+document.addEventListener("keydown", event => {
+	if (event.keyCode === 37) {
+		playerMove(-1);
+	} else if (event.keyCode === 39) {
+		playerMove(1);
+	} else if (event.keyCode === 40) {
+		playerDrop();
+	} else if (event.keyCode === 81) {
+		playerRotate(-1);
+	} else if (event.keyCode === 87) {
+		playerRotate(1);
+	}
+});
+
+playerReset();
+updateScore();
+update();
+
+function update(time = 0) {
+	const deltaTime = time - lastTime;
+	lastTime = time;
+
+	dropCounter += deltaTime;
+	if (dropCounter > dropInterval) {
+		playerDrop();
+	}
+	draw();
+	requestAnimationFrame(update);
+}
+
+function getDifficulty() {
+	[...document.getElementsByClassName("diff-buttons")].forEach(item => {
+		item.addEventListener("click", e => startGame(e.target.value));
+		item.addEventListener("mouseover", e => {
+			hover.play();
+		});
+	});
+}
+
+function startGame(val) {
+	console.log(val);
+	click.play();
+	tetrisMusic.play();
+
+	gameStart = true;
+	let difficultyMenu = document.getElementById("difficulty");
+	let gameElements = document.getElementsByClassName("hide");
+
+	difficultyMenu.style.display = "none";
+	[...gameElements].forEach(item => {
+		item.classList.remove("hide");
+	});
+
+	if (val == "easy") {
+		dropInterval = 1000;
+	} else if (val == "medium") {
+		dropInterval = 800;
+	} else if (val == "hard") {
+		dropInterval = 600;
+		randomMode();
+	}
+}
+
+function randomMode() {
+	console.log("random");
+}
 
 function arenaSweep() {
 	let rowCount = 1;
@@ -159,57 +258,3 @@ function rotate(matrix, dir) {
 function updateScore() {
 	document.getElementById("score").innerText = player.score;
 }
-
-const colors = [
-	null,
-	"#FF0D72",
-	"#0DC2FF",
-	"#0DFF72",
-	"#F538FF",
-	"#FF8E0D",
-	"#FFE138",
-	"#3877FF"
-];
-
-let dropCounter = 0;
-let dropInterval = 1000;
-
-let lastTime = 0;
-
-function update(time = 0) {
-	const deltaTime = time - lastTime;
-	lastTime = time;
-
-	dropCounter += deltaTime;
-	if (dropCounter > dropInterval) {
-		playerDrop();
-	}
-	draw();
-	requestAnimationFrame(update);
-}
-
-const arena = createMatrix(12, 20);
-
-const player = {
-	pos: { x: 5, y: 5 },
-	matrix: createPiece("T"),
-	score: 0
-};
-
-document.addEventListener("keydown", event => {
-	if (event.keyCode === 37) {
-		playerMove(-1);
-	} else if (event.keyCode === 39) {
-		playerMove(1);
-	} else if (event.keyCode === 40) {
-		playerDrop();
-	} else if (event.keyCode === 81) {
-		playerRotate(-1);
-	} else if (event.keyCode === 87) {
-		playerRotate(1);
-	}
-});
-
-playerReset();
-updateScore();
-update();

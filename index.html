@@ -7,11 +7,36 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 		<link rel="stylesheet" type="text/css" media="screen" href="tetris.css" />
+		<link
+			href="https://fonts.googleapis.com/css?family=Quicksand"
+			rel="stylesheet"
+		/>
+		<link
+			href="https://fonts.googleapis.com/css?family=Oswald"
+			rel="stylesheet"
+		/>
 	</head>
 	<body>
-		<div><h3 id="title">Tetris 2018</h3></div>
-		<div id="score"></div>
-		<canvas id="tetris" width="240" height="400"></canvas>
+		<div><h2 id="title" class="hide">Tetris 2018</h2></div>
+		<div id="difficulty">
+			<h3 id="diff-title">Welcome to Tetris!</h3>
+			<h4 id="diff-subtitle">Select your difficulty:</h4>
+			<ul>
+				<li>
+					<button id="easy" value="easy" class="diff-buttons">EASY</button>
+				</li>
+				<li>
+					<button id="medium" value="medium" class="diff-buttons">
+						MEDIUM
+					</button>
+				</li>
+				<li>
+					<button id="hard" value="hard" class="diff-buttons">HARD</button>
+				</li>
+			</ul>
+		</div>
+		<div id="score" class="hide"></div>
+		<canvas id="tetris" width="240" height="400" class="hide"></canvas>
 		<script src="tetris.js"></script>
 	</body>
 </html>

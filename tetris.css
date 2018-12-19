@@ -1,23 +1,70 @@
 body {
 	background: #12e6c9;
-	/* color: #fff; */
 	font-family: sans-serif;
 	font-size: 2em;
 	text-align: center;
 	color: black;
+	justify-items: center;
+	justify-content: center;
 }
 
 #title {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-		Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+	font-family: "Quicksand", sans-serif;
+}
+
+h4 {
+	font-weight: 200;
+}
+
+#difficulty {
+	text-align: center;
+	display: block;
+	margin: 100px auto;
+	padding-top: 30px;
+	background: rgba(255, 255, 255, 0.9);
+	border-radius: 5px;
+
+	width: 70vw;
+	min-height: 600px;
+}
+
+#diff-title {
+	font-size: 56px;
+}
+
+#difficulty ul {
+	z-index: 6;
+	list-style-type: none;
+	text-align: center;
+
+	padding-inline-start: 0px;
+}
+
+.diff-buttons {
+	background-color: rgb(179, 67, 67);
+	color: #eee;
+	font-size: 18px;
+	padding: 15px;
+	margin-top: 20px;
+	width: 300px;
+}
+
+.diff-buttons:hover {
+	background-color: greenyellow;
+	color: black;
+	cursor: pointer;
 }
 
 #score {
-	font-family: monospace;
+	font-family: "Oswald", sans-serif;
 	padding-bottom: 10px;
 }
 
 canvas {
 	border: solid 0.2em #fff;
 	height: 70vh;
+}
+
+.hide {
+	display: none;
 }
