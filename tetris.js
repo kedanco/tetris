@@ -3,11 +3,21 @@ const context = canvas.getContext("2d");
 context.scale(20, 20);
 
 let difficulty = "easy";
-let gameStart = false;
+let gamePaused = false;
+let musicPaused = false;
+let blackOverlay = document.getElementById("overlay");
+let btnPause = document.getElementById("btn-pause");
+let btnMute = document.getElementById("btn-mute");
 
-let click = new Audio("./sounds/Sound Effect - Mouse Click.mp3");
-let hover = new Audio("./sounds/166186__drminky__menu-screen-mouse-over.wav");
+let clickSound = new Audio("./sounds/Sound Effect - Mouse Click.mp3");
+let hoverSound = new Audio(
+	"./sounds/166186__drminky__menu-screen-mouse-over.wav"
+);
+
 let tetrisMusic = new Audio("./sounds/Tetris Theme (Dubstep Remix).mp3");
+let gameOverMusic = new Audio(
+	"./sounds/Tetris (Tengen) (NES) Music - Game Over.mp3"
+);
 
 const matrix = [[0, 0, 0], [1, 1, 1], [0, 1, 0]];
 
@@ -37,6 +47,14 @@ const player = {
 	score: 0
 };
 
+document
+	.getElementById("btn-pause")
+	.addEventListener("click", e => pauseUnpauseGame());
+
+document
+	.getElementById("btn-mute")
+	.addEventListener("click", e => pauseUnpauseMusic());
+
 document.addEventListener("keydown", event => {
 	if (event.keyCode === 37) {
 		playerMove(-1);
@@ -64,24 +82,26 @@ function update(time = 0) {
 		playerDrop();
 	}
 	draw();
-	requestAnimationFrame(update);
+	if (!gamePaused) {
+		requestAnimationFrame(update);
+	}
 }
 
 function getDifficulty() {
 	[...document.getElementsByClassName("diff-buttons")].forEach(item => {
 		item.addEventListener("click", e => startGame(e.target.value));
 		item.addEventListener("mouseover", e => {
-			hover.play();
+			hoverSound.play();
 		});
 	});
 }
 
 function startGame(val) {
 	console.log(val);
-	click.play();
+	clickSound.play();
 	tetrisMusic.play();
+	tetrisMusic.loop = true;
 
-	gameStart = true;
 	let difficultyMenu = document.getElementById("difficulty");
 	let gameElements = document.getElementsByClassName("hide");
 
@@ -91,16 +111,48 @@ function startGame(val) {
 	});
 
 	if (val == "easy") {
-		dropInterval = 1000;
-	} else if (val == "medium") {
 		dropInterval = 800;
+	} else if (val == "medium") {
+		dropInterval = 700;
 	} else if (val == "hard") {
 		dropInterval = 600;
 		randomMode();
 	}
 }
 
+function pauseUnpauseGame() {
+	pauseUnpauseMusic("game");
+	if (!gamePaused) {
+		gamePaused = true;
+		blackOverlay.style.display = "block";
+	} else {
+		gamePaused = false;
+		blackOverlay.style.display = "none";
+		requestAnimationFrame(update);
+	}
+
+	document.addEventListener("keydown", e => pauseUnpauseGame());
+}
+
+function pauseUnpauseMusic(src = "music") {
+	if (!musicPaused) {
+		tetrisMusic.pause();
+		musicPaused = true;
+		if (src == "music") {
+			btnMute.innerText = "Play Music";
+		}
+	} else {
+		tetrisMusic.play();
+		musicPaused = false;
+		if (src == "music") {
+			btnMute.innerText = "Stop Music";
+		}
+	}
+}
+
 function randomMode() {
+	const minInterval = 20000; //20 secs min interval
+	const maxInterval = 80000; //80 secs max interval
 	console.log("random");
 }
 

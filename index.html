@@ -17,6 +17,10 @@
 		/>
 	</head>
 	<body>
+		<div id="overlay">
+			<h2 id="overlay-title">Game Paused</h2>
+			<h4 id="overlay-subtitle">Press any key to continue</h4>
+		</div>
 		<div><h2 id="title" class="hide">Tetris 2018</h2></div>
 		<div id="difficulty">
 			<h3 id="diff-title">Welcome to Tetris!</h3>
@@ -36,6 +40,16 @@
 			</ul>
 		</div>
 		<div id="score" class="hide"></div>
+		<div id="left-bar" class="hide">
+			<p>Accelerate Block: <span class="control-key">🠻</span></p>
+			<p>Shift Block Sideways: <span class="control-key"> 🠸 Or 🠺</span></p>
+			<p>Rotate Block: <span class="control-key">W</span></p>
+
+			<div id="left-bar__buttons">
+				<button id="btn-pause" class="settings-btn">Pause Game</button>
+				<button id="btn-mute" class="settings-btn">Stop Music</button>
+			</div>
+		</div>
 		<canvas id="tetris" width="240" height="400" class="hide"></canvas>
 		<script src="tetris.js"></script>
 	</body>

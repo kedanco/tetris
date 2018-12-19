@@ -8,9 +8,13 @@ Initial Game completed following **Meth Meth Method**'s tutorial on Youtube:
 
 - [x] Difficulty Selection
 - [x] Game Music
-- [] End Game Screen before restart
-- [] Random Mode: Row Removal
+- [x] Controls Explanation
+- [x] Pause Game, Pause Music
+- [] Row Clearer Power-up
+- [] Danger Animation
+- [] Random Mode: Text Animation for every event
 - [] Random Mode: Row Addition (Grey Blocks)
 - [] Random Mode: Speed Increase
 - [] Random Mode: Repeat same block x5
+- [] End Game Screen before restart
 - [] Add Responsiveness

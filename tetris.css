@@ -55,6 +55,26 @@ h4 {
 	cursor: pointer;
 }
 
+#left-bar {
+	padding: 40px;
+	background-color: yellow;
+	position: absolute;
+	text-align: left;
+	left: 5vw;
+	top: 22%;
+	font-size: 16px;
+}
+
+.settings-btn {
+	padding: 10px;
+	font-size: 14px;
+}
+
+.control-key {
+	font-weight: bold;
+	font-size: 20px;
+}
+
 #score {
 	font-family: "Oswald", sans-serif;
 	padding-bottom: 10px;
@@ -67,4 +87,26 @@ canvas {
 
 .hide {
 	display: none;
+}
+
+#overlay {
+	text-align: center;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	display: none;
+	background-color: rgba(0, 0, 0, 0.7);
+	width: 100vw;
+	height: 100vh;
+	z-index: 100;
+	color: white;
+}
+
+#overlay-title,
+#overlay-subtitle {
+	position: relative;
+	top: 30%;
+}
+
+#overlay-title {
 }
