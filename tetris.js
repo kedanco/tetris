@@ -8,6 +8,8 @@ let musicPaused = false;
 let blackOverlay = document.getElementById("overlay");
 let btnPause = document.getElementById("btn-pause");
 let btnMute = document.getElementById("btn-mute");
+let resetTime = new Date();
+localStorage.setItem("elapsedTime", resetTime);
 
 let clickSound = new Audio("./sounds/Sound Effect - Mouse Click.mp3");
 let hoverSound = new Audio(
@@ -44,7 +46,8 @@ const arena = createMatrix(12, 20);
 const player = {
 	pos: { x: 5, y: 5 },
 	matrix: createPiece("T"),
-	score: 0
+	score: 0,
+	time: 0
 };
 
 document
@@ -70,7 +73,6 @@ document.addEventListener("keydown", event => {
 });
 
 playerReset();
-updateScore();
 update();
 
 function update(time = 0) {
@@ -82,6 +84,7 @@ function update(time = 0) {
 		playerDrop();
 	}
 	draw();
+
 	requestAnimationFrame(update);
 }
 
@@ -118,6 +121,8 @@ function startGame(val) {
 	}
 
 	gamePaused = false;
+	updateTime();
+	updateScore();
 }
 
 function pauseUnpauseGame() {
@@ -310,4 +315,31 @@ function rotate(matrix, dir) {
 
 function updateScore() {
 	document.getElementById("score").innerText = player.score;
+}
+
+function updateTime() {
+	console.log("time");
+	let time = localStorage.getItem("elapsedTime");
+	if (time) {
+		time = new Date(time);
+	} else {
+		time = new Date();
+		localStorage.setItem("elapsedTime", time);
+	}
+	let minutes,
+		seconds = 0;
+
+	if (!gamePaused) {
+		let x = setInterval(() => {
+			let now = new Date().getTime();
+			let distance = now - time.getTime();
+
+			minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+			seconds = Math.floor((distance % (1000 * 60)) / 1000);
+			if (seconds < 10) {
+				seconds = "0".concat(seconds);
+			}
+			document.getElementById("time").innerHTML = `${minutes}:${seconds}`;
+		}, 1000);
+	}
 }

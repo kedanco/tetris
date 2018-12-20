@@ -75,6 +75,17 @@ h4 {
 	font-size: 20px;
 }
 
+#score-time {
+	text-align: center;
+	display: block;
+}
+
+#score,
+#time {
+	width: 120px;
+	display: inline-block;
+}
+
 #score {
 	font-family: "Oswald", sans-serif;
 	padding-bottom: 10px;

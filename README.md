@@ -10,6 +10,7 @@ Initial Game completed following **Meth Meth Method**'s tutorial on Youtube:
 - [x] Game Music
 - [x] Controls Explanation
 - [x] Pause Game, Pause Music
+- [x] Time Elapsed
 - [] Row Clearer Power-up
 - [] Danger Animation
 - [] Random Mode: Text Animation for every event
