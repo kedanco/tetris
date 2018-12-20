@@ -3,7 +3,7 @@ const context = canvas.getContext("2d");
 context.scale(20, 20);
 
 let difficulty = "easy";
-let gamePaused = false;
+let gamePaused = true;
 let musicPaused = false;
 let blackOverlay = document.getElementById("overlay");
 let btnPause = document.getElementById("btn-pause");
@@ -78,13 +78,11 @@ function update(time = 0) {
 	lastTime = time;
 
 	dropCounter += deltaTime;
-	if (dropCounter > dropInterval) {
+	if (dropCounter > dropInterval && !gamePaused) {
 		playerDrop();
 	}
 	draw();
-	if (!gamePaused) {
-		requestAnimationFrame(update);
-	}
+	requestAnimationFrame(update);
 }
 
 function getDifficulty() {
@@ -118,6 +116,8 @@ function startGame(val) {
 		dropInterval = 600;
 		randomMode();
 	}
+
+	gamePaused = false;
 }
 
 function pauseUnpauseGame() {
@@ -242,6 +242,7 @@ function merge(arena, player) {
 }
 
 function playerDrop() {
+	console.log("drop");
 	player.pos.y++;
 	if (collide(arena, player)) {
 		player.pos.y--;
