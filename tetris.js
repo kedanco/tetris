@@ -8,8 +8,7 @@ let musicPaused = false;
 let blackOverlay = document.getElementById("overlay");
 let btnPause = document.getElementById("btn-pause");
 let btnMute = document.getElementById("btn-mute");
-let resetTime = new Date();
-localStorage.setItem("elapsedTime", resetTime);
+let timeCounter = 0;
 
 let clickSound = new Audio("./sounds/Sound Effect - Mouse Click.mp3");
 let hoverSound = new Audio(
@@ -247,7 +246,7 @@ function merge(arena, player) {
 }
 
 function playerDrop() {
-	console.log("drop");
+	// console.log("drop");
 	player.pos.y++;
 	if (collide(arena, player)) {
 		player.pos.y--;
@@ -318,28 +317,26 @@ function updateScore() {
 }
 
 function updateTime() {
-	console.log("time");
-	let time = localStorage.getItem("elapsedTime");
-	if (time) {
-		time = new Date(time);
-	} else {
-		time = new Date();
-		localStorage.setItem("elapsedTime", time);
-	}
-	let minutes,
-		seconds = 0;
-
 	if (!gamePaused) {
-		let x = setInterval(() => {
-			let now = new Date().getTime();
-			let distance = now - time.getTime();
+		console.log("time");
 
-			minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-			seconds = Math.floor((distance % (1000 * 60)) / 1000);
-			if (seconds < 10) {
-				seconds = "0".concat(seconds);
+		let minutes,
+			seconds = 0;
+		document.getElementById("time").innerHTML = "0:01";
+
+		let x = setInterval(() => {
+			if (!gamePaused) {
+				timeCounter++;
+
+				minutes = Math.floor(timeCounter / 60);
+				seconds = Math.floor(timeCounter % 60);
+				// console.log(minutes, seconds);
+
+				if (seconds < 10) {
+					seconds = "0".concat(seconds);
+				}
+				document.getElementById("time").innerHTML = `${minutes}:${seconds}`;
 			}
-			document.getElementById("time").innerHTML = `${minutes}:${seconds}`;
 		}, 1000);
 	}
 }
