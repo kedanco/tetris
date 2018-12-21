@@ -8,7 +8,15 @@ let musicPaused = false;
 let blackOverlay = document.getElementById("overlay");
 let btnPause = document.getElementById("btn-pause");
 let btnMute = document.getElementById("btn-mute");
+let sweeperDisplay = document.getElementById("sweepers");
 let timeCounter = 0;
+
+let bulldozer = new Image(60, 60);
+bulldozer.src = "./bulldozer-left.png";
+bulldozer.classList.add("bulldozer");
+
+localStorage.setItem("timeMilestone", 0);
+localStorage.setItem("scoreMilestone", 0);
 
 let clickSound = new Audio("./sounds/Sound Effect - Mouse Click.mp3");
 let hoverSound = new Audio(
@@ -35,6 +43,8 @@ const colors = [
 let dropCounter = 0;
 let lastTime = 0;
 let dropInterval = 1000;
+let scoreInterval = 300;
+let timeInterval = 100;
 
 getDifficulty();
 
@@ -46,7 +56,7 @@ const player = {
 	pos: { x: 5, y: 5 },
 	matrix: createPiece("T"),
 	score: 0,
-	time: 0
+	sweeper: 0
 };
 
 document
@@ -68,6 +78,8 @@ document.addEventListener("keydown", event => {
 		playerRotate(-1);
 	} else if (event.keyCode === 87) {
 		playerRotate(1);
+	} else if (event.keyCode === 32) {
+		useSweeper();
 	}
 });
 
@@ -83,6 +95,7 @@ function update(time = 0) {
 		playerDrop();
 	}
 	draw();
+	updateSweepers();
 
 	requestAnimationFrame(update);
 }
@@ -112,10 +125,16 @@ function startGame(val) {
 
 	if (val == "easy") {
 		dropInterval = 800;
+		timeInterval = 100;
+		scoreInterval = 300;
 	} else if (val == "medium") {
 		dropInterval = 700;
+		timeInterval = 200;
+		scoreInterval = 400;
 	} else if (val == "hard") {
 		dropInterval = 600;
+		timeInterval = 300;
+		scoreInterval = 500;
 		randomMode();
 	}
 
@@ -318,8 +337,6 @@ function updateScore() {
 
 function updateTime() {
 	if (!gamePaused) {
-		console.log("time");
-
 		let minutes,
 			seconds = 0;
 		document.getElementById("time").innerHTML = "0:01";
@@ -338,5 +355,80 @@ function updateTime() {
 				document.getElementById("time").innerHTML = `${minutes}:${seconds}`;
 			}
 		}, 1000);
+	}
+}
+
+function updateSweepers() {
+	// Check Score
+	let scoreMilestone = localStorage.getItem("scoreMilestone");
+	if (!scoreMilestone) {
+		scoreMilestone = 0;
+	}
+	let scoreDifference = player.score - scoreMilestone;
+	if (scoreDifference >= scoreInterval) {
+		console.log("score sweeper");
+		addSweeper();
+		localStorage.setItem(
+			"scoreMilestone",
+			parseInt(scoreMilestone) + scoreInterval
+		);
+	}
+
+	// Check Time
+	let timeMilestone = localStorage.getItem("timeMilestone");
+	if (!timeMilestone) {
+		timeMilestone = 0;
+	}
+	let timeDifference = timeCounter - timeMilestone;
+	if (timeDifference >= timeInterval) {
+		console.log("time sweeper");
+		addSweeper();
+		localStorage.setItem(
+			"timeMilestone",
+			parseInt(timeMilestone) + timeInterval
+		);
+	}
+}
+
+function addSweeper() {
+	player.sweeper++;
+	renderSweeper();
+}
+
+function useSweeper() {
+	if (player.sweeper > 0) {
+		console.log("Using Sweeper");
+
+		// Remove row from bottom
+
+		let y = arena.length - 1;
+		let row = arena.splice(y, 1)[0].fill(0);
+		arena.unshift(row);
+		y++;
+
+		// Update amount, display
+		player.sweeper--;
+		renderSweeper();
+	}
+	if (player.sweeper < 1) {
+		sweeperDisplay.innerText = "No Sweepers Available";
+	}
+}
+
+function renderSweeper() {
+	console.log("rendering");
+	sweeperDisplay.innerText = "";
+	[...sweeperDisplay.children].forEach(child => {
+		sweeperDisplay.removeChild(child);
+	});
+
+	for (let x = 0; x < player.sweeper; x++) {
+		if (x > 0) {
+			let image = document.getElementsByClassName("bulldozer")[0];
+			let clone = image.cloneNode(true);
+			sweeperDisplay.appendChild(clone);
+		} else {
+			sweeperDisplay.appendChild(bulldozer);
+		}
 	}
 }
