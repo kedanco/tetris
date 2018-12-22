@@ -4,11 +4,17 @@ context.scale(20, 20);
 
 let difficulty = "easy";
 let gamePaused = true;
+let gameOver = false;
 let musicPaused = false;
-let blackOverlay = document.getElementById("overlay");
+let pauseOverlay = document.getElementById("pause");
+let gameoverOverlay = document.getElementById("gameover");
 let btnPause = document.getElementById("btn-pause");
 let btnMute = document.getElementById("btn-mute");
+let btnMenu = document.getElementById("btn-menu");
+let btnRestart = document.getElementById("btn-restart");
 let sweeperDisplay = document.getElementById("sweepers");
+let difficultyMenu = document.getElementById("difficulty");
+let gameElements = document.getElementsByClassName("hide");
 let timeCounter = 0;
 
 let bulldozer = new Image(60, 60);
@@ -91,7 +97,7 @@ function update(time = 0) {
 	lastTime = time;
 
 	dropCounter += deltaTime;
-	if (dropCounter > dropInterval && !gamePaused) {
+	if (dropCounter > dropInterval && !gamePaused && !gameOver) {
 		playerDrop();
 	}
 	draw();
@@ -109,19 +115,23 @@ function getDifficulty() {
 	});
 }
 
+function toggleMenu() {
+	difficultyMenu.style.display == "none"
+		? (difficultyMenu.style.display = "block")
+		: (difficultyMenu.style.display = "none");
+
+	[...document.getElementsByClassName("gameItem")].forEach(item => {
+		item.classList.toggle("hide");
+	});
+}
+
 function startGame(val) {
 	console.log(val);
 	clickSound.play();
 	tetrisMusic.play();
 	tetrisMusic.loop = true;
 
-	let difficultyMenu = document.getElementById("difficulty");
-	let gameElements = document.getElementsByClassName("hide");
-
-	difficultyMenu.style.display = "none";
-	[...gameElements].forEach(item => {
-		item.classList.remove("hide");
-	});
+	toggleMenu();
 
 	if (val == "easy") {
 		dropInterval = 800;
@@ -147,10 +157,10 @@ function pauseUnpauseGame() {
 	pauseUnpauseMusic("game");
 	if (!gamePaused) {
 		gamePaused = true;
-		blackOverlay.style.display = "block";
+		pauseOverlay.style.display = "block";
 	} else {
 		gamePaused = false;
-		blackOverlay.style.display = "none";
+		pauseOverlay.style.display = "none";
 		requestAnimationFrame(update);
 	}
 
@@ -292,10 +302,56 @@ function playerReset() {
 		((arena[0].length / 2) | 0) - ((player.matrix[0].length / 2) | 0);
 
 	if (collide(arena, player)) {
-		arena.forEach(row => row.fill(0));
-		player.score = 0;
-		updateScore();
+		gameOver = true;
+		gameOverMusic.play();
+
+		// Update High Score
+		let highScore = localStorage.getItem("tetrisHighScore");
+
+		if (!highScore) {
+			highScore = 0;
+		}
+		if (player.score > highScore) {
+			localStorage.setItem("tetrisHighScore", player.score);
+			localStorage.setItem("tetrisEndTime", timeCounter);
+		}
+
+		// Display Game Over Overlay
+		gameoverOverlay.style.display = "block";
+		document.getElementById("gameover-score").innerText = `Final Score: ${
+			player.score
+		}`;
+		document.getElementById(
+			"gameover-time"
+		).innerText = `Final Time: ${timeCounter}`;
+
+		btnMenu.addEventListener("click", e => {
+			restartGame();
+			toMainMenu();
+		});
+
+		btnRestart.addEventListener("click", e => {
+			restartGame();
+		});
 	}
+}
+
+function restartGame() {
+	arena.forEach(row => row.fill(0));
+	player.score = 0;
+	timeCounter = 0;
+	gamePaused = false;
+	gameOver = false;
+	updateScore();
+	document.getElementById("time").innerHTML = "0:00";
+
+	gameoverOverlay.style.display = "none";
+}
+
+function toMainMenu() {
+	gamePaused = true;
+
+	toggleMenu();
 }
 
 function playerRotate(dir) {
@@ -339,10 +395,10 @@ function updateTime() {
 	if (!gamePaused) {
 		let minutes,
 			seconds = 0;
-		document.getElementById("time").innerHTML = "0:01";
+		document.getElementById("time").innerHTML = "0:00";
 
 		let x = setInterval(() => {
-			if (!gamePaused) {
+			if (!gamePaused && !gameOver) {
 				timeCounter++;
 
 				minutes = Math.floor(timeCounter / 60);

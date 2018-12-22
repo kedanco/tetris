@@ -12,6 +12,7 @@ Initial Game completed following **Meth Meth Method**'s tutorial on Youtube:
 - [x] Pause Game, Pause Music
 - [x] Time Elapsed
 - [x] Row Clearer Power-up
+- [x] End Game Screen before restart
 - [] Danger Animation
 - [] Random Mode: Text Animation for every event
 - [] Random Mode: Receive 1 Extra Power-up
@@ -19,5 +20,4 @@ Initial Game completed following **Meth Meth Method**'s tutorial on Youtube:
 - [] Random Mode: Bomb Block (Destroy Blocks)
 - [] Random Mode: Speed Increase
 - [] Random Mode: Repeat same block x5
-- [] End Game Screen before restart
 - [] Add Responsiveness

@@ -17,11 +17,20 @@
 		/>
 	</head>
 	<body>
-		<div id="overlay">
-			<h2 id="overlay-title">Game Paused</h2>
-			<h4 id="overlay-subtitle">Press any key to continue</h4>
+		<div id="pause" class="overlay">
+			<h2 id="pause-title">Game Paused</h2>
+			<h4 id="pause-subtitle">Press any key to continue</h4>
 		</div>
-		<div><h2 id="title" class="hide">Tetris 2018</h2></div>
+		<div id="gameover" class="overlay">
+			<h2 id="gameover-title">Game Over</h2>
+			<h4 id="gameover-score"></h4>
+			<h4 id="gameover-time"></h4>
+			<div id="gameover-buttons">
+				<button id="btn-menu">Main Menu</button>
+				<button id="btn-restart">Restart</button>
+			</div>
+		</div>
+		<div><h2 id="title" class="gameItem hide">Tetris 2018</h2></div>
 		<div id="difficulty">
 			<h3 id="diff-title">Welcome to Tetris!</h3>
 			<h4 id="diff-subtitle">Select your difficulty:</h4>
@@ -39,11 +48,11 @@
 				</li>
 			</ul>
 		</div>
-		<div id="score-time" class="hide">
-			<div id="time" class="hide"></div>
-			<div id="score" class="hide"></div>
+		<div id="score-time" class="gameItem hide">
+			<div id="time"></div>
+			<div id="score"></div>
 		</div>
-		<div id="left-bar" class="hide">
+		<div id="left-bar" class="gameItem hide">
 			<p>Accelerate Block: <span class="control-key">🠻</span></p>
 			<p>Shift Block Sideways: <span class="control-key"> 🠸 Or 🠺</span></p>
 			<p>Rotate Block: <span class="control-key">W</span></p>
@@ -53,13 +62,13 @@
 				<button id="btn-mute" class="settings-btn">Stop Music</button>
 			</div>
 		</div>
-		<div id="right-bar" class="hide">
+		<div id="right-bar" class="gameItem hide">
 			<h2>Sweepers</h2>
 			<h4>Sweepers are gained by reaching a certain time or score.</h4>
 			<h4>Use a sweeper with the <em>'spacebar'</em> to clear a row.</h4>
 			<div id="sweepers">No Sweepers Available</div>
 		</div>
-		<canvas id="tetris" width="240" height="400" class="hide"></canvas>
+		<canvas id="tetris" width="240" height="400" class="gameItem hide"></canvas>
 		<script src="tetris.js"></script>
 	</body>
 </html>
