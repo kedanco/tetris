@@ -345,10 +345,10 @@ function restartGame(val) {
 		gamePaused = true;
 	} else {
 		gamePaused = false;
+		startGame(difficulty);
 	}
 
 	gameoverOverlay.style.display = "none";
-	startGame(difficulty);
 }
 
 function playerRotate(dir) {
@@ -389,6 +389,7 @@ function updateScore() {
 }
 
 function updateTime() {
+	console.log("time");
 	if (!gamePaused) {
 		let minutes,
 			seconds = 0;
@@ -407,6 +408,7 @@ function updateTime() {
 				}
 				document.getElementById("time").innerHTML = `${minutes}:${seconds}`;
 			} else if (gameOver) {
+				console.log("remove time");
 				clearInterval(x);
 			}
 		}, 1000);
