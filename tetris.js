@@ -25,10 +25,6 @@ localStorage.setItem("timeMilestone", 0);
 localStorage.setItem("scoreMilestone", 0);
 
 let clickSound = new Audio("./sounds/Sound Effect - Mouse Click.mp3");
-let hoverSound = new Audio(
-	"./sounds/166186__drminky__menu-screen-mouse-over.wav"
-);
-
 let tetrisMusic = new Audio("./sounds/Tetris Theme (Dubstep Remix).mp3");
 let gameOverMusic = new Audio(
 	"./sounds/Tetris (Tengen) (NES) Music - Game Over.mp3"
@@ -65,13 +61,18 @@ const player = {
 	sweeper: 0
 };
 
-document
-	.getElementById("btn-pause")
-	.addEventListener("click", e => pauseUnpauseGame());
+btnPause.addEventListener("click", e => pauseUnpauseGame());
 
-document
-	.getElementById("btn-mute")
-	.addEventListener("click", e => pauseUnpauseMusic());
+btnMute.addEventListener("click", e => pauseUnpauseMusic());
+
+btnMenu.addEventListener("click", e => {
+	restartGame("main");
+	toggleMenu();
+});
+
+btnRestart.addEventListener("click", e => {
+	restartGame("restart");
+});
 
 document.addEventListener("keydown", event => {
 	if (event.keyCode === 37) {
@@ -89,9 +90,6 @@ document.addEventListener("keydown", event => {
 	}
 });
 
-playerReset();
-update();
-
 function update(time = 0) {
 	const deltaTime = time - lastTime;
 	lastTime = time;
@@ -103,69 +101,75 @@ function update(time = 0) {
 	draw();
 	updateSweepers();
 
-	requestAnimationFrame(update);
+	if (!gamePaused && !gameOver) {
+		requestAnimationFrame(update);
+	}
 }
 
 function getDifficulty() {
 	[...document.getElementsByClassName("diff-buttons")].forEach(item => {
-		item.addEventListener("click", e => startGame(e.target.value));
-		item.addEventListener("mouseover", e => {
-			hoverSound.play();
+		item.addEventListener("click", e => {
+			toggleMenu();
+			difficulty = e.target.value;
+			startGame();
 		});
 	});
 }
 
 function toggleMenu() {
-	difficultyMenu.style.display == "none"
-		? (difficultyMenu.style.display = "block")
-		: (difficultyMenu.style.display = "none");
+	//should only touch visual elements
+	console.log("toggle");
+	// difficultyMenu.style.display == "none"
+	// 	? (difficultyMenu.style.display = "block")
+	// 	: (difficultyMenu.style.display = "none");
 
 	[...document.getElementsByClassName("gameItem")].forEach(item => {
 		item.classList.toggle("hide");
 	});
 }
 
-function startGame(val) {
-	console.log(val);
+function startGame() {
 	clickSound.play();
 	tetrisMusic.play();
 	tetrisMusic.loop = true;
 
-	toggleMenu();
-
-	if (val == "easy") {
+	if (difficulty == "easy") {
 		dropInterval = 800;
 		timeInterval = 100;
 		scoreInterval = 300;
-	} else if (val == "medium") {
+	} else if (difficulty == "medium") {
 		dropInterval = 700;
 		timeInterval = 200;
 		scoreInterval = 400;
-	} else if (val == "hard") {
+	} else if (difficulty == "hard") {
 		dropInterval = 600;
 		timeInterval = 300;
 		scoreInterval = 500;
 		randomMode();
 	}
 
+	gameOver = false;
 	gamePaused = false;
 	updateTime();
 	updateScore();
+	update();
 }
 
-function pauseUnpauseGame() {
+let pauseUnpauseGame = function(e) {
 	pauseUnpauseMusic("game");
 	if (!gamePaused) {
+		console.log("pause");
 		gamePaused = true;
 		pauseOverlay.style.display = "block";
+		document.addEventListener("keydown", pauseUnpauseGame, true);
 	} else {
+		console.log("unpause");
 		gamePaused = false;
 		pauseOverlay.style.display = "none";
 		requestAnimationFrame(update);
+		document.removeEventListener("keydown", pauseUnpauseGame, true);
 	}
-
-	document.addEventListener("keydown", e => pauseUnpauseGame());
-}
+};
 
 function pauseUnpauseMusic(src = "music") {
 	if (!musicPaused) {
@@ -312,8 +316,11 @@ function playerReset() {
 			highScore = 0;
 		}
 		if (player.score > highScore) {
+			console.log("setting high score");
 			localStorage.setItem("tetrisHighScore", player.score);
 			localStorage.setItem("tetrisEndTime", timeCounter);
+		} else {
+			console.log("you weak");
 		}
 
 		// Display Game Over Overlay
@@ -324,34 +331,24 @@ function playerReset() {
 		document.getElementById(
 			"gameover-time"
 		).innerText = `Final Time: ${timeCounter}`;
-
-		btnMenu.addEventListener("click", e => {
-			restartGame();
-			toMainMenu();
-		});
-
-		btnRestart.addEventListener("click", e => {
-			restartGame();
-		});
 	}
 }
 
-function restartGame() {
+function restartGame(val) {
 	arena.forEach(row => row.fill(0));
 	player.score = 0;
+
 	timeCounter = 0;
-	gamePaused = false;
-	gameOver = false;
-	updateScore();
 	document.getElementById("time").innerHTML = "0:00";
+	gameOver = false;
+	if (val == "main") {
+		gamePaused = true;
+	} else {
+		gamePaused = false;
+	}
 
 	gameoverOverlay.style.display = "none";
-}
-
-function toMainMenu() {
-	gamePaused = true;
-
-	toggleMenu();
+	startGame(difficulty);
 }
 
 function playerRotate(dir) {
@@ -409,6 +406,8 @@ function updateTime() {
 					seconds = "0".concat(seconds);
 				}
 				document.getElementById("time").innerHTML = `${minutes}:${seconds}`;
+			} else if (gameOver) {
+				clearInterval(x);
 			}
 		}, 1000);
 	}
