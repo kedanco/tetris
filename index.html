@@ -30,45 +30,59 @@
 				<button id="btn-restart">Restart</button>
 			</div>
 		</div>
-		<div><h2 id="title" class="gameItem hide">Tetris 2018</h2></div>
-		<div id="difficulty" class="gameItem">
-			<h3 id="diff-title">Welcome to Tetris!</h3>
-			<h4 id="diff-subtitle">Select your difficulty:</h4>
-			<ul>
-				<li>
-					<button id="easy" value="easy" class="diff-buttons">EASY</button>
-				</li>
-				<li>
-					<button id="medium" value="medium" class="diff-buttons">
-						MEDIUM
-					</button>
-				</li>
-				<li>
-					<button id="hard" value="hard" class="diff-buttons">HARD</button>
-				</li>
-			</ul>
-		</div>
-		<div id="score-time" class="gameItem hide">
-			<div id="time"></div>
-			<div id="score"></div>
-		</div>
-		<div id="left-bar" class="gameItem hide">
-			<p>Accelerate Block: <span class="control-key">🠻</span></p>
-			<p>Shift Block Sideways: <span class="control-key"> 🠸 Or 🠺</span></p>
-			<p>Rotate Block: <span class="control-key">W</span></p>
-
-			<div id="left-bar__buttons">
-				<button id="btn-pause" class="settings-btn">Pause Game</button>
-				<button id="btn-mute" class="settings-btn">Stop Music</button>
+		<div id="game-wrapper" class="container">
+			<div id="difficulty" class="gameItem">
+				<h3 id="diff-title">Welcome to Tetris!</h3>
+				<h4 id="diff-subtitle">Select your difficulty:</h4>
+				<ul>
+					<li>
+						<button id="easy" value="easy" class="diff-buttons">EASY</button>
+					</li>
+					<li>
+						<button id="medium" value="medium" class="diff-buttons">
+							MEDIUM
+						</button>
+					</li>
+					<li>
+						<button id="hard" value="hard" class="diff-buttons">HARD</button>
+					</li>
+				</ul>
 			</div>
+			<div id="game-header">
+				<h2 id="title" class="gameItem hide">Kedanco's Tetris</h2>
+				<div id="score-time" class="gameItem hide">
+					<div id="time"></div>
+					<div id="score"></div>
+				</div>
+			</div>
+			<div id="left-bar" class="gameItem hide">
+				<div id="controls-options">
+					<p>Accelerate Block: <span class="control-key">🠻</span></p>
+					<p>Shift Block Sideways: <span class="control-key"> 🠸 Or 🠺</span></p>
+					<p>Rotate Block: <span class="control-key">W</span></p>
+
+					<div id="left-bar__buttons">
+						<button id="btn-pause" class="settings-btn">Pause Game</button>
+						<button id="btn-mute" class="settings-btn">Stop Music</button>
+					</div>
+				</div>
+			</div>
+			<div id="right-bar" class="gameItem hide">
+				<div id="sweepers">
+					<h2>Sweepers</h2>
+					<h4>Sweepers are gained by reaching a certain time or score.</h4>
+					<h4>Use a sweeper with the <em>'spacebar'</em> to clear a row.</h4>
+					<div id="sweeper-count">No Sweepers Available</div>
+				</div>
+			</div>
+			<canvas
+				id="tetris"
+				width="240"
+				height="400"
+				class="gameItem hide"
+			></canvas>
+			<div id="footer">Footer</div>
 		</div>
-		<div id="right-bar" class="gameItem hide">
-			<h2>Sweepers</h2>
-			<h4>Sweepers are gained by reaching a certain time or score.</h4>
-			<h4>Use a sweeper with the <em>'spacebar'</em> to clear a row.</h4>
-			<div id="sweepers">No Sweepers Available</div>
-		</div>
-		<canvas id="tetris" width="240" height="400" class="gameItem hide"></canvas>
 		<script src="tetris.js"></script>
 	</body>
 </html>
