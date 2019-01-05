@@ -20,7 +20,7 @@ h4 {
 #game-wrapper {
 	display: grid;
 	grid-template-columns: 2fr 3fr 2fr;
-	grid-template-rows: 2fr 3fr 1fr;
+	grid-template-rows: 200px 650px auto;
 	height: 100vh;
 	/* overflow: hidden; */
 }
@@ -28,12 +28,13 @@ h4 {
 #difficulty {
 	display: grid;
 	grid-row: 2/3;
-	margin-left: -60px;
+	margin-left: -50px;
 	grid-column: 2/3;
 	width: 120%;
 	text-align: center;
 	background: rgba(255, 255, 255, 0.9);
 	border-radius: 5px;
+	max-height: 600px;
 }
 
 #diff-title {
@@ -79,7 +80,7 @@ h4 {
 	display: grid;
 	grid-row: 2/3;
 	grid-column: 1/2;
-	height: inherit;
+	/* height: inherit; */
 
 	grid-template-rows: 1fr 1fr 1fr;
 	justify-self: center;
@@ -148,7 +149,7 @@ canvas {
 	grid-column: 2/3;
 	justify-self: center;
 	border: solid 0.2em #fff;
-	height: 70vh;
+	height: 65vh;
 }
 
 .hide {

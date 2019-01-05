@@ -13,7 +13,7 @@ Initial Game completed following **Meth Meth Method**'s tutorial on Youtube:
 - [x] Time Elapsed
 - [x] Row Clearer Power-up
 - [x] End Game Screen before restart
-- [] Add Responsiveness
+- [x] Add Responsiveness
 - [] Danger Animation
 - [] Random Mode: Text Animation for every event
 - [] Random Mode: Receive 1 Extra Power-up
