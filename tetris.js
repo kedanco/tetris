@@ -337,6 +337,8 @@ function playerReset() {
 function restartGame(val) {
 	arena.forEach(row => row.fill(0));
 	player.score = 0;
+	player.sweeper = 0;
+	renderSweeper();
 
 	timeCounter = 0;
 	document.getElementById("time").innerHTML = "0:00";
@@ -467,9 +469,6 @@ function useSweeper() {
 		player.sweeper--;
 		renderSweeper();
 	}
-	if (player.sweeper < 1) {
-		sweeperDisplay.innerText = "No Sweepers Available";
-	}
 }
 
 function renderSweeper() {
@@ -487,5 +486,8 @@ function renderSweeper() {
 		} else {
 			sweeperDisplay.appendChild(bulldozer);
 		}
+	}
+	if (player.sweeper < 1) {
+		sweeperDisplay.innerText = "No Sweepers Available";
 	}
 }
