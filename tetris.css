@@ -19,7 +19,7 @@ h4 {
 
 #game-wrapper {
 	display: grid;
-	grid-template-columns: 2fr 3fr 2fr;
+	grid-template-columns: 2fr 3.5fr 2fr;
 	grid-template-rows: 200px 650px auto;
 	height: 100vh;
 	/* overflow: hidden; */
@@ -28,9 +28,9 @@ h4 {
 #difficulty {
 	display: grid;
 	grid-row: 2/3;
-	margin-left: -50px;
+	margin: 0px auto;
 	grid-column: 2/3;
-	width: 120%;
+	width: 100%;
 	text-align: center;
 	background: rgba(255, 255, 255, 0.9);
 	border-radius: 5px;
@@ -119,6 +119,35 @@ h4 {
 #score {
 	font-family: "Oswald", sans-serif;
 	padding-bottom: 10px;
+}
+
+/* display difficulty */
+
+#display-difficulty {
+	font-family: monospace;
+	border: 2px solid black;
+	font-size: 30px;
+	padding: 15px;
+	margin: 0px auto;
+	align-self: center;
+
+	display: grid;
+	grid-row: 1/2;
+	grid-column: 3/4;
+	height: 30px;
+	width: 150px;
+}
+
+.easy {
+	background-color: lime;
+}
+
+.medium {
+	background-color: orange;
+}
+
+.hard {
+	background-color: red;
 }
 
 #right-bar {
@@ -232,4 +261,8 @@ canvas {
 	display: grid;
 	grid-column: 1/4;
 	grid-row: 3/4;
+}
+
+.randomMode {
+	display: none;
 }

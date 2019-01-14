@@ -15,6 +15,7 @@ let btnRestart = document.getElementById("btn-restart");
 let sweeperDisplay = document.getElementById("sweeper-count");
 let difficultyMenu = document.getElementById("difficulty");
 let gameElements = document.getElementsByClassName("hide");
+let displayMode = document.getElementById("display-mode");
 let timeCounter = 0;
 
 let bulldozer = new Image(60, 60);
@@ -47,6 +48,9 @@ let lastTime = 0;
 let dropInterval = 1000;
 let scoreInterval = 300;
 let timeInterval = 100;
+const modeInterval = 30000; //30 secs min interval
+const minDelay = 10000;
+const maxDelay = 60000; //80 secs max interval
 
 getDifficulty();
 
@@ -109,8 +113,8 @@ function update(time = 0) {
 function getDifficulty() {
 	[...document.getElementsByClassName("diff-buttons")].forEach(item => {
 		item.addEventListener("click", e => {
-			toggleMenu();
 			difficulty = e.target.value;
+			toggleMenu();
 			startGame();
 		});
 	});
@@ -126,6 +130,21 @@ function toggleMenu() {
 	[...document.getElementsByClassName("gameItem")].forEach(item => {
 		item.classList.toggle("hide");
 	});
+
+	let diffButton = document.getElementById("display-difficulty");
+
+	if (difficulty == "easy") {
+		diffButton.innerText = "EASY";
+		diffButton.classList.add("easy");
+	} else if (difficulty == "medium") {
+		diffButton.innerText = "MEDIUM";
+		diffButton.classList.add("medium");
+	} else if (difficulty == "hard") {
+		diffButton.innerText = "HARD";
+		diffButton.classList.add("hard");
+
+		document.getElementsByClassName("randomMode")[0].classList.toggle("hide");
+	}
 }
 
 function startGame() {
@@ -188,9 +207,27 @@ function pauseUnpauseMusic(src = "music") {
 }
 
 function randomMode() {
-	const minInterval = 20000; //20 secs min interval
-	const maxInterval = 80000; //80 secs max interval
 	console.log("random");
+
+	let modeCheck = setInterval(() => {
+		let rdmDelay = Math.floor(Math.random() * (maxDelay - minDelay) + minDelay);
+		// let modeStart = setInterval(getMode, rdmDelay);
+	}, modeInterval);
+}
+
+function getMode() {
+	const modes = ["power-Up", "bomb", "speed-Up", "greyBlock"];
+	let chosenMode = modes[Math.floor(Math.random() * modes.length)];
+
+	if (chosenMode == "powerup") {
+		console.log("powerup");
+	} else if (chosenMode == "bomb") {
+		console.log("bomb");
+	} else if (chosenMode == "speedUp") {
+		console.log("speedup");
+	} else if (chosenMode == "greyBlock") {
+		console.log("greyBlock");
+	}
 }
 
 function arenaSweep() {
