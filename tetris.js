@@ -17,6 +17,7 @@ let difficultyMenu = document.getElementById("difficulty");
 let gameElements = document.getElementsByClassName("hide");
 let displayMode = document.getElementById("display-mode");
 let timeCounter = 0;
+let gameModeInterval = 0;
 
 let bulldozer = new Image(60, 60);
 bulldozer.src = "./bulldozer-left.png";
@@ -48,9 +49,9 @@ let lastTime = 0;
 let dropInterval = 1000;
 let scoreInterval = 300;
 let timeInterval = 100;
-const modeInterval = 30000; //30 secs min interval
+const modeMinInterval = 20000; //30 secs min interval
 const minDelay = 10000;
-const maxDelay = 60000; //80 secs max interval
+const maxDelay = 20000; //80 secs max interval
 
 getDifficulty();
 
@@ -188,6 +189,8 @@ let pauseUnpauseGame = function(e) {
 		requestAnimationFrame(update);
 		document.removeEventListener("keydown", pauseUnpauseGame, true);
 	}
+
+	if(gameModeInterval != 0)
 };
 
 function pauseUnpauseMusic(src = "music") {
@@ -209,10 +212,10 @@ function pauseUnpauseMusic(src = "music") {
 function randomMode() {
 	console.log("random");
 
-	let modeCheck = setInterval(() => {
+	gameModeInterval = setInterval(() => {
 		let rdmDelay = Math.floor(Math.random() * (maxDelay - minDelay) + minDelay);
-		// let modeStart = setInterval(getMode, rdmDelay);
-	}, modeInterval);
+		let gameModeCall = setTimeout(getMode(), rdmDelay);
+	}, modeMinInterval);
 }
 
 function getMode() {
@@ -385,6 +388,7 @@ function restartGame(val) {
 	} else {
 		gamePaused = false;
 		startGame(difficulty);
+		clearInterval(gameModeInterval);
 	}
 
 	gameoverOverlay.style.display = "none";
@@ -428,7 +432,7 @@ function updateScore() {
 }
 
 function updateTime() {
-	console.log("time");
+	// console.log("time");
 	if (!gamePaused) {
 		let minutes,
 			seconds = 0;
