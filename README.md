@@ -14,10 +14,10 @@ Initial Game completed following **Meth Meth Method**'s tutorial on Youtube:
 - [x] Row Clearer Power-up
 - [x] End Game Screen before restart
 - [x] Add Responsiveness
-- [] Danger Animation
-- [] Random Mode: Receive 1 Extra Power-up
-- [] Random Mode: Bottom Row Addition (Grey Blocks)
-- [] Random Mode: Bomb Block (Destroy Blocks)
-- [] Random Mode: Speed Increase
-- [] Random Mode: Text Animation for every event
-- [] Random Mode: Repeat same block x5
+- [ ] Danger Animation
+- [ ] Random Mode: Receive 1 Extra Power-up
+- [ ] Random Mode: Bottom Row Addition (Grey Blocks)
+- [ ] Random Mode: Bomb Block (Destroy Blocks)
+- [ ] Random Mode: Speed Increase
+- [ ] Random Mode: Text Animation for every event
+- [ ] Random Mode: Repeat same block x5

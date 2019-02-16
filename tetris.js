@@ -6,6 +6,7 @@ let difficulty = "easy";
 let gamePaused = true;
 let gameOver = false;
 let musicPaused = false;
+let doNotSwitchMusic = 0;
 let pauseOverlay = document.getElementById("pause");
 let gameoverOverlay = document.getElementById("gameover");
 let btnPause = document.getElementById("btn-pause");
@@ -18,6 +19,7 @@ let gameElements = document.getElementsByClassName("hide");
 let displayMode = document.getElementById("display-mode");
 let timeCounter = 0;
 let gameModeInterval = 0;
+var randomTimer, gameModeCall;
 
 let bulldozer = new Image(60, 60);
 bulldozer.src = "./bulldozer-left.png";
@@ -165,7 +167,7 @@ function startGame() {
 		dropInterval = 600;
 		timeInterval = 300;
 		scoreInterval = 500;
-		randomMode();
+		randomTimer = randomMode();
 	}
 
 	gameOver = false;
@@ -176,21 +178,34 @@ function startGame() {
 }
 
 let pauseUnpauseGame = function(e) {
-	pauseUnpauseMusic("game");
+	pauseUnpauseRandomInterval();
+	if (doNotSwitchMusic === 0 && musicPaused) {
+		doNotSwitchMusic = true;
+	}
+
 	if (!gamePaused) {
 		console.log("pause");
 		gamePaused = true;
 		pauseOverlay.style.display = "block";
 		document.addEventListener("keydown", pauseUnpauseGame, true);
+		if (!musicPaused) {
+			doNotSwitchMusic = false;
+			pauseUnpauseMusic("game");
+		}
 	} else {
 		console.log("unpause");
 		gamePaused = false;
+		if (!doNotSwitchMusic) {
+			pauseUnpauseMusic("game");
+		}
 		pauseOverlay.style.display = "none";
 		requestAnimationFrame(update);
 		document.removeEventListener("keydown", pauseUnpauseGame, true);
+		doNotSwitchMusic = 0;
 	}
 
-	if(gameModeInterval != 0)
+	if (gameModeInterval !== 0) {
+	}
 };
 
 function pauseUnpauseMusic(src = "music") {
@@ -214,9 +229,66 @@ function randomMode() {
 
 	gameModeInterval = setInterval(() => {
 		let rdmDelay = Math.floor(Math.random() * (maxDelay - minDelay) + minDelay);
-		let gameModeCall = setTimeout(getMode(), rdmDelay);
+
+		gameModeCall = new timer(() => getMode(), rdmDelay);
+		console.log(gameModeCall);
 	}, modeMinInterval);
+
+	// return gameModeCall;
 }
+
+function pauseUnpauseRandomInterval() {
+	if (!gamePaused) {
+		//pausing
+		clearInterval(gameModeInterval);
+		gameModeCall.pause();
+		console.log(`gameModeInterval is ${gameModeInterval}`);
+	} else {
+		//unpause
+		let timeRemaining = gameModeCall.getTimeLeft();
+		console.log(timeRemaining);
+		gameModeCall.start();
+		setTimeout(() => {
+			randomMode();
+		}, modeMinInterval + timeRemaining + 1000);
+	}
+}
+
+let timer = function(callback, delay) {
+	var id,
+		started,
+		remaining = delay,
+		running;
+
+	this.callback = callback;
+
+	this.start = function() {
+		running = true;
+		started = new Date();
+		id = setTimeout(this.callback, remaining);
+	};
+
+	this.pause = function() {
+		running = false;
+		clearTimeout(id);
+		remaining -= new Date() - started;
+	};
+
+	this.getTimeLeft = function() {
+		if (running) {
+			this.pause();
+			this.start();
+		}
+
+		return remaining;
+	};
+
+	this.getStateRunning = function() {
+		return running;
+	};
+
+	this.start();
+};
 
 function getMode() {
 	const modes = ["power-Up", "bomb", "speed-Up", "greyBlock"];
@@ -231,6 +303,8 @@ function getMode() {
 	} else if (chosenMode == "greyBlock") {
 		console.log("greyBlock");
 	}
+
+	return chosenMode;
 }
 
 function arenaSweep() {
@@ -347,6 +421,8 @@ function playerReset() {
 
 	if (collide(arena, player)) {
 		gameOver = true;
+		tetrisMusic.pause();
+		tetrisMusic.currentTime = 0;
 		gameOverMusic.play();
 
 		// Update High Score
@@ -389,6 +465,7 @@ function restartGame(val) {
 		gamePaused = false;
 		startGame(difficulty);
 		clearInterval(gameModeInterval);
+		gameModeCall.pause();
 	}
 
 	gameoverOverlay.style.display = "none";
