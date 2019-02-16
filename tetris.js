@@ -2,6 +2,7 @@ const canvas = document.getElementById("tetris");
 const context = canvas.getContext("2d");
 context.scale(20, 20);
 
+let timerArr = new Map();
 let difficulty = "easy";
 let gamePaused = true;
 let gameOver = false;
@@ -17,9 +18,10 @@ let sweeperDisplay = document.getElementById("sweeper-count");
 let difficultyMenu = document.getElementById("difficulty");
 let gameElements = document.getElementsByClassName("hide");
 let displayMode = document.getElementById("display-mode");
+let randomText = document.getElementById("random-text");
 let timeCounter = 0;
 let gameModeInterval = 0;
-var randomTimer, gameModeCall;
+var gameModeCall;
 
 let bulldozer = new Image(60, 60);
 bulldozer.src = "./bulldozer-left.png";
@@ -51,9 +53,9 @@ let lastTime = 0;
 let dropInterval = 1000;
 let scoreInterval = 300;
 let timeInterval = 100;
-const modeMinInterval = 20000; //30 secs min interval
-const minDelay = 10000;
-const maxDelay = 20000; //80 secs max interval
+const modeMinInterval = 18000; //30 secs min interval
+const minDelay = 1000;
+const maxDelay = 5000; //80 secs max interval
 
 getDifficulty();
 
@@ -111,6 +113,10 @@ function update(time = 0) {
 	if (!gamePaused && !gameOver) {
 		requestAnimationFrame(update);
 	}
+
+	// if (Math.floor(time) % 10 == 0) {
+	// 	console.log(timerArr);
+	// }
 }
 
 function getDifficulty() {
@@ -126,9 +132,6 @@ function getDifficulty() {
 function toggleMenu() {
 	//should only touch visual elements
 	console.log("toggle");
-	// difficultyMenu.style.display == "none"
-	// 	? (difficultyMenu.style.display = "block")
-	// 	: (difficultyMenu.style.display = "none");
 
 	[...document.getElementsByClassName("gameItem")].forEach(item => {
 		item.classList.toggle("hide");
@@ -145,8 +148,6 @@ function toggleMenu() {
 	} else if (difficulty == "hard") {
 		diffButton.innerText = "HARD";
 		diffButton.classList.add("hard");
-
-		document.getElementsByClassName("randomMode")[0].classList.toggle("hide");
 	}
 }
 
@@ -164,7 +165,7 @@ function startGame() {
 		timeInterval = 200;
 		scoreInterval = 400;
 	} else if (difficulty == "hard") {
-		dropInterval = 600;
+		dropInterval = 500;
 		timeInterval = 300;
 		scoreInterval = 500;
 		randomTimer = randomMode();
@@ -178,7 +179,9 @@ function startGame() {
 }
 
 let pauseUnpauseGame = function(e) {
-	pauseUnpauseRandomInterval();
+	if (difficulty == "hard") {
+		pauseUnpauseRandomInterval();
+	}
 	if (doNotSwitchMusic === 0 && musicPaused) {
 		doNotSwitchMusic = true;
 	}
@@ -202,9 +205,6 @@ let pauseUnpauseGame = function(e) {
 		requestAnimationFrame(update);
 		document.removeEventListener("keydown", pauseUnpauseGame, true);
 		doNotSwitchMusic = 0;
-	}
-
-	if (gameModeInterval !== 0) {
 	}
 };
 
@@ -230,7 +230,10 @@ function randomMode() {
 	gameModeInterval = setInterval(() => {
 		let rdmDelay = Math.floor(Math.random() * (maxDelay - minDelay) + minDelay);
 
-		gameModeCall = new timer(() => getMode(), rdmDelay);
+		gameModeCall = new timer(() => {
+			getMode();
+		}, rdmDelay);
+		gameModeCall.start();
 		console.log(gameModeCall);
 	}, modeMinInterval);
 
@@ -238,28 +241,34 @@ function randomMode() {
 }
 
 function pauseUnpauseRandomInterval() {
-	if (!gamePaused) {
-		//pausing
-		clearInterval(gameModeInterval);
-		gameModeCall.pause();
-		console.log(`gameModeInterval is ${gameModeInterval}`);
-	} else {
-		//unpause
-		let timeRemaining = gameModeCall.getTimeLeft();
-		console.log(timeRemaining);
-		gameModeCall.start();
-		setTimeout(() => {
-			randomMode();
-		}, modeMinInterval + timeRemaining + 1000);
+	if (gameModeCall) {
+		if (!gamePaused) {
+			//pausing
+			clearInterval(gameModeInterval);
+			gameModeCall.pause();
+			console.log(`gameModeInterval is ${gameModeInterval}`);
+		} else {
+			//unpause
+			let timeRemaining = gameModeCall.getTimeLeft();
+			console.log(timeRemaining);
+			gameModeCall.start();
+			setTimeout(() => {
+				randomMode();
+			}, modeMinInterval + timeRemaining + 1000);
+		}
 	}
 }
 
 let timer = function(callback, delay) {
-	var id,
+	var id = timeCounter.toString(),
 		started,
 		remaining = delay,
 		running;
 
+	this.id = id;
+	this.started = started;
+	this.running = running;
+	this.remaining = remaining;
 	this.callback = callback;
 
 	this.start = function() {
@@ -283,6 +292,14 @@ let timer = function(callback, delay) {
 		return remaining;
 	};
 
+	this.getID = function() {
+		if (running) {
+			return id;
+		} else {
+			return "Not Running";
+		}
+	};
+
 	this.getStateRunning = function() {
 		return running;
 	};
@@ -296,15 +313,38 @@ function getMode() {
 
 	if (chosenMode == "powerup") {
 		console.log("powerup");
+		randomText.classList.add("powerup");
+		randomText.innerText = "Power-Up!";
 	} else if (chosenMode == "bomb") {
 		console.log("bomb");
+		randomText.classList.add("bomb");
+		randomText.innerText = "Bomb!";
 	} else if (chosenMode == "speedUp") {
 		console.log("speedup");
+		randomText.classList.add("speedup");
+		randomText.innerText = "Speed-Up!";
 	} else if (chosenMode == "greyBlock") {
-		console.log("greyBlock");
+		console.log("greyblock");
+		randomText.classList.add("greyblock");
+		randomText.innerText = "Grey Blocks!";
 	}
 
-	return chosenMode;
+	randomText.classList.add("animateMode");
+
+	setTimeout(() => {
+		randomText.classList.remove("animateMode");
+
+		setTimeout(() => {
+			randomText.classList.add("fade");
+		}, 1000);
+
+		setTimeout(() => {
+			randomText.innerHTML = "";
+			randomText.className = "";
+		}, 4000);
+	}, 6000);
+
+	// return chosenMode;
 }
 
 function arenaSweep() {
@@ -424,6 +464,13 @@ function playerReset() {
 		tetrisMusic.pause();
 		tetrisMusic.currentTime = 0;
 		gameOverMusic.play();
+
+		// Stop randomMode timers
+		if (difficulty == "hard") {
+			clearInterval(gameModeInterval);
+			gameModeCall.pause();
+			randomText.innerText = "";
+		}
 
 		// Update High Score
 		let highScore = localStorage.getItem("tetrisHighScore");
@@ -590,7 +637,7 @@ function useSweeper() {
 }
 
 function renderSweeper() {
-	console.log("rendering");
+	// console.log("rendering");
 	sweeperDisplay.innerText = "";
 	[...sweeperDisplay.children].forEach(child => {
 		sweeperDisplay.removeChild(child);

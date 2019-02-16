@@ -34,7 +34,7 @@ h4 {
 	text-align: center;
 	background: rgba(255, 255, 255, 0.9);
 	border-radius: 5px;
-	max-height: 600px;
+	max-height: 650px;
 }
 
 #diff-title {
@@ -56,7 +56,7 @@ h4 {
 	font-size: 18px;
 
 	padding: 15px;
-	margin-top: 20px;
+	margin-top: 15px;
 	width: 300px;
 }
 
@@ -81,12 +81,14 @@ h4 {
 	grid-row: 2/3;
 	grid-column: 1/2;
 	/* height: inherit; */
+	grid-gap: 10px;
 
 	grid-template-rows: 1fr 1fr 1fr;
 	justify-self: center;
 }
 
 #controls-options {
+	margin: 10px;
 	padding: 40px;
 	text-align: left;
 	font-size: 16px;
@@ -174,6 +176,7 @@ h4 {
 	color: black;
 	background-color: white;
 	border-radius: 50%;
+	border: 2px solid #222;
 	font-size: 14px;
 	padding: 1px 7px;
 }
@@ -195,6 +198,12 @@ h4 {
 	visibility: hidden;
 	z-index: 2;
 }
+
+.inverse {
+	color: white;
+	background-color: black;
+}
+
 .tooltip:hover:after {
 	opacity: 1;
 	visibility: visible;
@@ -263,6 +272,58 @@ canvas {
 	grid-row: 3/4;
 }
 
-.randomMode {
-	display: none;
+#random-mode {
+	/* background-color: #ff9800; */
+	background-color: white;
+	margin: 10px;
+	padding: 0px;
+	/* min-height: 180px; */
+}
+
+#random-title {
+	font-size: 24px;
+	padding-bottom: 15px;
+	border-bottom: 1px solid black;
+}
+
+#random-text {
+	font-family: "Quicksand", sans-serif;
+	padding: 20px;
+	font-size: 30px;
+	font-weight: bold;
+}
+
+/* Power-ups */
+
+.speedup {
+	color: limegreen;
+}
+
+.greyblock {
+	color: #666;
+}
+
+.bomb {
+	color: red;
+}
+
+.powerup {
+	color: yellow;
+}
+
+.animateMode {
+	animation: 0.3s linear 0.5s 10 alternate backwards flashfade;
+}
+
+.fade {
+	animation: 2s linear 0s 1 normal forwards flashfade;
+}
+
+@keyframes flashfade {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
 }
