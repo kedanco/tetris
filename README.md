@@ -15,9 +15,10 @@ Initial Game completed following **Meth Meth Method**'s tutorial on Youtube:
 - [x] End Game Screen before restart
 - [x] Add Responsiveness
 - [x] Random Mode: Text Animation for every event
+- [x] Random Mode: Receive 3 Extra Power-up
+- [x] Random Mode: Speed Increase
+- [x] Random Mode: Score Multiplier Bonus
 - [ ] Danger Animation
-- [ ] Random Mode: Receive 1 Extra Power-up
 - [ ] Random Mode: Bottom Row Addition (Grey Blocks)
 - [ ] Random Mode: Bomb Block (Destroy Blocks)
-- [ ] Random Mode: Speed Increase
-- [ ] Random Mode: Repeat same block x5
+- [ ] Code Refactor with random.js

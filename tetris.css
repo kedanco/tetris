@@ -220,7 +220,7 @@ h4 {
 
 .bulldozer {
 	display: inline-block;
-	margin: 10px;
+	margin: 5px;
 }
 
 canvas {
@@ -252,10 +252,16 @@ canvas {
 #pause-title,
 #pause-subtitle,
 #gameover-title,
-#gameover-score,
-#gameover-time,
-#gameover-buttons {
+#gameover-content {
 	position: relative;
+}
+
+#gameover-content {
+	top: 20%;
+}
+
+#pause-title,
+#pause-subtitle {
 	top: 30%;
 }
 
@@ -293,19 +299,21 @@ canvas {
 	padding: 20px;
 	font-size: 30px;
 	font-weight: bold;
+	text-shadow: 0px 2px 3px #222;
 }
 
 #random-description {
 	font-size: 18px;
+	text-shadow: 0px 1px 2px #222;
 }
 
 /* Power-ups */
 
-.speedup {
+.speed-up {
 	color: limegreen;
 }
 
-.greyblock {
+.grey-block {
 	color: #666;
 }
 
@@ -313,8 +321,12 @@ canvas {
 	color: red;
 }
 
-.powerup {
+.power-up {
 	color: yellow;
+}
+
+.score-plus {
+	color: blue;
 }
 
 .animateMode {

@@ -1,43 +1,12 @@
+const random = new Random();
 const canvas = document.getElementById("tetris");
+
 const context = canvas.getContext("2d");
 context.scale(20, 20);
 
-let difficulty = "easy";
-let gamePaused = true;
-let gameOver = false;
-let musicPaused = false;
-let doNotSwitchMusic = 0;
-let timeCounter = 0;
-let randomCount = 0;
-let gameModeInterval = 0;
-let rowCount = 1;
-let gameModeCall;
-let scoreMultiplier = 2;
-let pauseOverlay = document.getElementById("pause");
-let gameoverOverlay = document.getElementById("gameover");
-let btnPause = document.getElementById("btn-pause");
-let btnMute = document.getElementById("btn-mute");
-let btnMenu = document.getElementById("btn-menu");
-let btnRestart = document.getElementById("btn-restart");
-let sweeperDisplay = document.getElementById("sweeper-count");
-let difficultyMenu = document.getElementById("difficulty");
-let gameElements = document.getElementsByClassName("hide");
-let displayMode = document.getElementById("display-mode");
-let randomText = document.getElementById("random-text");
-let randomDesc = document.getElementById("random-description");
-
-let bulldozer = new Image(60, 60);
-bulldozer.src = "./bulldozer-left.png";
-bulldozer.classList.add("bulldozer");
-
-localStorage.setItem("timeMilestone", 0);
-localStorage.setItem("scoreMilestone", 0);
-
-let clickSound = new Audio("./sounds/Sound Effect - Mouse Click.mp3");
-let tetrisMusic = new Audio("./sounds/Tetris Theme (Dubstep Remix).mp3");
-let gameOverMusic = new Audio(
-	"./sounds/Tetris (Tengen) (NES) Music - Game Over.mp3"
-);
+const modeMinInterval = 18000; //30 secs min interval
+const minDelay = 1000;
+const maxDelay = 5000; //80 secs max interval
 
 const matrix = [[0, 0, 0], [1, 1, 1], [0, 1, 0]];
 
@@ -51,14 +20,49 @@ const colors = [
 	"#FFE138",
 	"#3877FF"
 ];
-let dropCounter = 0;
-let lastTime = 0;
-let dropInterval = 1000;
-let scoreInterval = 300;
-let timeInterval = 100;
-const modeMinInterval = 18000; //30 secs min interval
-const minDelay = 1000;
-const maxDelay = 5000; //80 secs max interval
+
+let difficulty = "easy",
+	gamePaused = true,
+	gameOver = false,
+	musicPaused = false,
+	doNotSwitchMusic = 0,
+	timeCounter = 0,
+	randomCount = 0,
+	gameModeInterval = 0,
+	scorePlusOn = false,
+	rowCount = 1,
+	gameModeCall,
+	scoreMultiplier = 2,
+	dropCounter = 0,
+	lastTime = 0,
+	dropInterval = 1000,
+	scoreInterval = 300,
+	timeInterval = 100,
+	pauseOverlay = document.getElementById("pause"),
+	gameoverOverlay = document.getElementById("gameover"),
+	btnPause = document.getElementById("btn-pause"),
+	btnMute = document.getElementById("btn-mute"),
+	btnMenu = document.getElementById("btn-menu"),
+	btnRestart = document.getElementById("btn-restart"),
+	sweeperDisplay = document.getElementById("sweeper-count"),
+	difficultyMenu = document.getElementById("difficulty"),
+	gameElements = document.getElementsByClassName("hide"),
+	displayMode = document.getElementById("display-mode"),
+	randomText = document.getElementById("random-text"),
+	randomDesc = document.getElementById("random-description");
+
+let bulldozer = new Image(60, 60);
+bulldozer.src = "./bulldozer-left.png";
+bulldozer.classList.add("bulldozer");
+
+localStorage.setItem("timeMilestone", 0);
+localStorage.setItem("scoreMilestone", 0);
+
+let clickSound = new Audio("./sounds/Sound Effect - Mouse Click.mp3");
+let tetrisMusic = new Audio("./sounds/Tetris Theme (Dubstep Remix).mp3");
+let gameOverMusic = new Audio(
+	"./sounds/Tetris (Tengen) (NES) Music - Game Over.mp3"
+);
 
 getDifficulty();
 
@@ -144,13 +148,13 @@ function toggleMenu() {
 
 	if (difficulty == "easy") {
 		diffButton.innerText = "EASY";
-		diffButton.classList.add("easy");
+		diffButton.className = "easy";
 	} else if (difficulty == "medium") {
 		diffButton.innerText = "MEDIUM";
-		diffButton.classList.add("medium");
+		diffButton.className = "medium";
 	} else if (difficulty == "hard") {
 		diffButton.innerText = "HARD";
-		diffButton.classList.add("hard");
+		diffButton.className = "hard";
 	}
 }
 
@@ -174,7 +178,7 @@ function startGame() {
 		timeInterval = 300;
 		scoreInterval = 700;
 		scoreMultiplier = 4;
-		randomTimer = randomMode();
+		randomMode();
 	}
 
 	gameOver = false;
@@ -313,44 +317,88 @@ let timer = function(callback, delay) {
 };
 
 function getMode() {
-	const modes = ["power-Up", "bomb", "speed-Up", "greyBlock"];
-	let chosenMode = modes[Math.floor(Math.random() * modes.length)];
+	const modes = [
+		"power-up",
+		"power-up",
+		"speed-up",
+		"speed-up",
+		"score-plus",
+		"speed-up",
+		"power-up"
+	];
+	let chosenMode = modes[random.integer(0, modes.length)];
 
-	if (chosenMode == "powerup") {
+	if (chosenMode == "power-up") {
+		let sweepNumToAdd =
+			difficulty == "easy"
+				? 1
+				: difficulty == "medium"
+				? 2
+				: difficulty == "hard"
+				? 3
+				: "";
 		console.log("powerup");
-		randomText.classList.add("powerup");
 		randomText.innerText = "Power-Up!";
+		randomDesc.innerText = `${sweepNumToAdd} Sweepers Added!`;
+		for (let i = 0; i < sweepNumToAdd; i++) {
+			addSweeper();
+		}
 	} else if (chosenMode == "bomb") {
 		console.log("bomb");
-		randomText.classList.add("bomb");
 		randomText.innerText = "Bomb!";
-	} else if (chosenMode == "speedUp") {
-		console.log("speedup");
-		randomText.classList.add("speedup");
+		randomDesc.innerText = "Blasting off some blocks!";
+	} else if (chosenMode == "speed-up") {
+		console.log("speed-up");
 		randomText.innerText = "Speed-Up!";
-	} else if (chosenMode == "greyBlock") {
-		console.log("greyblock");
-		randomText.classList.add("greyblock");
+		randomDesc.innerText = "Turbooooooo!";
+		speedUp();
+	} else if (chosenMode == "grey-block") {
+		console.log("grey-block");
 		randomText.innerText = "Grey Blocks!";
+		randomDesc.innerText = "Here comes another row!";
+	} else if (chosenMode == "score-plus") {
+		console.log("score-plus");
+		randomText.innerText = "Score Plus!";
+		randomDesc.innerText = "3X the next score you gain!";
+		scorePlusOn = true;
 	}
 
+	// Animating, fading Random Mode Text
 	randomText.classList.add("animateMode");
+	randomText.classList.add(chosenMode);
+	randomDesc.classList.add(chosenMode);
 
 	setTimeout(() => {
 		randomText.classList.remove("animateMode");
 
 		setTimeout(() => {
 			randomText.classList.add("fade");
+			randomDesc.classList.add("fade");
 		}, 1000);
 
 		setTimeout(() => {
 			randomText.innerHTML = "";
+			randomDesc.innerHTML = "";
 			randomText.className = "";
+			randomDesc.className = "";
 		}, 4000);
 	}, 6000);
 
-	// return chosenMode;
+	randomCount++;
 }
+
+function speedUp() {
+	let originalDrop = dropInterval;
+	dropInterval -= 200;
+
+	setTimeout(() => {
+		dropInterval = originalDrop;
+	}, 8000);
+}
+
+function addGreyBlocks() {}
+
+function addBombPiece() {}
 
 function arenaSweep() {
 	outer: for (let y = arena.length - 1; y > 0; y--) {
@@ -365,7 +413,14 @@ function arenaSweep() {
 		y++;
 
 		player.score += rowCount * 10;
+		if (scorePlusOn) {
+			player.score += rowCount * 10 * 2;
+			scorePlusOn = false;
+		}
 		rowCount += scoreMultiplier;
+
+		// Interval of Sweeper Redemption follows scoreMultiplier
+		scoreInterval *= 1.1;
 	}
 }
 
@@ -472,7 +527,7 @@ function playerReset() {
 		// Stop randomMode timers
 		if (difficulty == "hard") {
 			clearInterval(gameModeInterval);
-			gameModeCall.pause();
+			gameModeCall ? gameModeCall.pause() : "";
 			randomText.innerText = "";
 		}
 
@@ -498,16 +553,18 @@ function playerReset() {
 		document.getElementById(
 			"gameover-time"
 		).innerText = `Final Time: ${timeCounter}`;
+		document.getElementById(
+			"gameover-random"
+		).innerText = `Random Events: ${randomCount}`;
 	}
 }
 
 function restartGame(val) {
 	arena.forEach(row => row.fill(0));
-	player.score = 0;
-	player.sweeper = 0;
+	player.score, player.sweeper, timeCounter, (randomCount = 0);
+
 	renderSweeper();
 
-	timeCounter = 0;
 	document.getElementById("time").innerHTML = "0:00";
 	gameOver = false;
 	if (val == "main") {
@@ -516,7 +573,11 @@ function restartGame(val) {
 		gamePaused = false;
 		startGame(difficulty);
 		clearInterval(gameModeInterval);
-		gameModeCall.pause();
+		gameModeInterval = 0;
+		if (gameModeCall) {
+			gameModeCall.pause();
+			gameModeCall = null;
+		}
 	}
 
 	gameoverOverlay.style.display = "none";
