@@ -2,12 +2,17 @@ const canvas = document.getElementById("tetris");
 const context = canvas.getContext("2d");
 context.scale(20, 20);
 
-let timerArr = new Map();
 let difficulty = "easy";
 let gamePaused = true;
 let gameOver = false;
 let musicPaused = false;
 let doNotSwitchMusic = 0;
+let timeCounter = 0;
+let randomCount = 0;
+let gameModeInterval = 0;
+let rowCount = 1;
+let gameModeCall;
+let scoreMultiplier = 2;
 let pauseOverlay = document.getElementById("pause");
 let gameoverOverlay = document.getElementById("gameover");
 let btnPause = document.getElementById("btn-pause");
@@ -19,9 +24,7 @@ let difficultyMenu = document.getElementById("difficulty");
 let gameElements = document.getElementsByClassName("hide");
 let displayMode = document.getElementById("display-mode");
 let randomText = document.getElementById("random-text");
-let timeCounter = 0;
-let gameModeInterval = 0;
-var gameModeCall;
+let randomDesc = document.getElementById("random-description");
 
 let bulldozer = new Image(60, 60);
 bulldozer.src = "./bulldozer-left.png";
@@ -160,14 +163,17 @@ function startGame() {
 		dropInterval = 800;
 		timeInterval = 100;
 		scoreInterval = 300;
+		scoreMultiplier = 2;
 	} else if (difficulty == "medium") {
 		dropInterval = 700;
 		timeInterval = 200;
-		scoreInterval = 400;
+		scoreInterval = 500;
+		scoreMultiplier = 3;
 	} else if (difficulty == "hard") {
 		dropInterval = 500;
 		timeInterval = 300;
-		scoreInterval = 500;
+		scoreInterval = 700;
+		scoreMultiplier = 4;
 		randomTimer = randomMode();
 	}
 
@@ -241,21 +247,24 @@ function randomMode() {
 }
 
 function pauseUnpauseRandomInterval() {
-	if (gameModeCall) {
-		if (!gamePaused) {
-			//pausing
-			clearInterval(gameModeInterval);
+	if (!gamePaused) {
+		//pausing
+		if (gameModeCall) {
 			gameModeCall.pause();
-			console.log(`gameModeInterval is ${gameModeInterval}`);
-		} else {
-			//unpause
-			let timeRemaining = gameModeCall.getTimeLeft();
+		}
+		clearInterval(gameModeInterval);
+	} else {
+		//unpause
+		if (gameModeCall) {
+			var timeRemaining = gameModeCall.getTimeLeft();
 			console.log(timeRemaining);
 			gameModeCall.start();
-			setTimeout(() => {
-				randomMode();
-			}, modeMinInterval + timeRemaining + 1000);
+		} else {
+			var timeRemaining = 3000;
 		}
+		setTimeout(() => {
+			randomMode();
+		}, timeRemaining + 1000);
 	}
 }
 
@@ -266,8 +275,6 @@ let timer = function(callback, delay) {
 		running;
 
 	this.id = id;
-	this.started = started;
-	this.running = running;
 	this.remaining = remaining;
 	this.callback = callback;
 
@@ -303,8 +310,6 @@ let timer = function(callback, delay) {
 	this.getStateRunning = function() {
 		return running;
 	};
-
-	this.start();
 };
 
 function getMode() {
@@ -348,7 +353,6 @@ function getMode() {
 }
 
 function arenaSweep() {
-	let rowCount = 1;
 	outer: for (let y = arena.length - 1; y > 0; y--) {
 		for (let x = 0; x < arena[y].length; x++) {
 			if (arena[y][x] === 0) {
@@ -361,7 +365,7 @@ function arenaSweep() {
 		y++;
 
 		player.score += rowCount * 10;
-		rowCount *= 2;
+		rowCount += scoreMultiplier;
 	}
 }
 

@@ -266,11 +266,13 @@ canvas {
 	font-size: 18px;
 }
 
-#footer {
+/* #footer {
 	display: grid;
 	grid-column: 1/4;
 	grid-row: 3/4;
-}
+} */
+
+/* RANDOM MODE */
 
 #random-mode {
 	/* background-color: #ff9800; */
@@ -291,6 +293,10 @@ canvas {
 	padding: 20px;
 	font-size: 30px;
 	font-weight: bold;
+}
+
+#random-description {
+	font-size: 18px;
 }
 
 /* Power-ups */
