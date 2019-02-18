@@ -4,9 +4,10 @@ const canvas = document.getElementById("tetris");
 const context = canvas.getContext("2d");
 context.scale(20, 20);
 
-const modeMinInterval = 18000; //30 secs min interval
+const eventMinInterval = 18000; //30 secs min interval
 const minDelay = 1000;
 const maxDelay = 5000; //80 secs max interval
+const pieces = "ILJOTSZ";
 
 const matrix = [[0, 0, 0], [1, 1, 1], [0, 1, 0]];
 
@@ -18,7 +19,8 @@ const colors = [
 	"#F538FF",
 	"#FF8E0D",
 	"#FFE138",
-	"#3877FF"
+	"#3877FF",
+	"#888888"
 ];
 
 let difficulty = "easy",
@@ -27,17 +29,18 @@ let difficulty = "easy",
 	musicPaused = false,
 	doNotSwitchMusic = 0,
 	timeCounter = 0,
-	randomCount = 0,
-	gameModeInterval = 0,
-	scorePlusOn = false,
 	rowCount = 1,
-	gameModeCall,
 	scoreMultiplier = 2,
 	dropCounter = 0,
 	lastTime = 0,
 	dropInterval = 1000,
 	scoreInterval = 300,
 	timeInterval = 100,
+	scorePlusOn = false,
+	randomCount = 0,
+	gameEventsInterval = 0,
+	gameEventsCall,
+	animationEvent,
 	pauseOverlay = document.getElementById("pause"),
 	gameoverOverlay = document.getElementById("gameover"),
 	btnPause = document.getElementById("btn-pause"),
@@ -72,7 +75,7 @@ const arena = createMatrix(12, 20);
 
 const player = {
 	pos: { x: 5, y: 5 },
-	matrix: createPiece("T"),
+	matrix: createPiece(pieces[(pieces.length * Math.random()) | 0]),
 	score: 0,
 	sweeper: 0
 };
@@ -120,10 +123,6 @@ function update(time = 0) {
 	if (!gamePaused && !gameOver) {
 		requestAnimationFrame(update);
 	}
-
-	// if (Math.floor(time) % 10 == 0) {
-	// 	console.log(timerArr);
-	// }
 }
 
 function getDifficulty() {
@@ -159,9 +158,12 @@ function toggleMenu() {
 }
 
 function startGame() {
+	clickSound.currentTime = 0.2;
 	clickSound.play();
-	tetrisMusic.play();
-	tetrisMusic.loop = true;
+	setTimeout(() => {
+		tetrisMusic.play();
+		tetrisMusic.loop = true;
+	}, 500);
 
 	if (difficulty == "easy") {
 		dropInterval = 800;
@@ -178,11 +180,14 @@ function startGame() {
 		timeInterval = 300;
 		scoreInterval = 700;
 		scoreMultiplier = 4;
-		randomMode();
+		animationEvent = whichAnimationEvent();
+		randomEvents();
 	}
 
 	gameOver = false;
 	gamePaused = false;
+	player.sweeper = 0;
+	timeCounter = 0;
 	updateTime();
 	updateScore();
 	update();
@@ -234,176 +239,10 @@ function pauseUnpauseMusic(src = "music") {
 	}
 }
 
-function randomMode() {
-	console.log("random");
-
-	gameModeInterval = setInterval(() => {
-		let rdmDelay = Math.floor(Math.random() * (maxDelay - minDelay) + minDelay);
-
-		gameModeCall = new timer(() => {
-			getMode();
-		}, rdmDelay);
-		gameModeCall.start();
-		console.log(gameModeCall);
-	}, modeMinInterval);
-
-	// return gameModeCall;
-}
-
-function pauseUnpauseRandomInterval() {
-	if (!gamePaused) {
-		//pausing
-		if (gameModeCall) {
-			gameModeCall.pause();
-		}
-		clearInterval(gameModeInterval);
-	} else {
-		//unpause
-		if (gameModeCall) {
-			var timeRemaining = gameModeCall.getTimeLeft();
-			console.log(timeRemaining);
-			gameModeCall.start();
-		} else {
-			var timeRemaining = 3000;
-		}
-		setTimeout(() => {
-			randomMode();
-		}, timeRemaining + 1000);
-	}
-}
-
-let timer = function(callback, delay) {
-	var id = timeCounter.toString(),
-		started,
-		remaining = delay,
-		running;
-
-	this.id = id;
-	this.remaining = remaining;
-	this.callback = callback;
-
-	this.start = function() {
-		running = true;
-		started = new Date();
-		id = setTimeout(this.callback, remaining);
-	};
-
-	this.pause = function() {
-		running = false;
-		clearTimeout(id);
-		remaining -= new Date() - started;
-	};
-
-	this.getTimeLeft = function() {
-		if (running) {
-			this.pause();
-			this.start();
-		}
-
-		return remaining;
-	};
-
-	this.getID = function() {
-		if (running) {
-			return id;
-		} else {
-			return "Not Running";
-		}
-	};
-
-	this.getStateRunning = function() {
-		return running;
-	};
-};
-
-function getMode() {
-	const modes = [
-		"power-up",
-		"power-up",
-		"speed-up",
-		"speed-up",
-		"score-plus",
-		"speed-up",
-		"power-up"
-	];
-	let chosenMode = modes[random.integer(0, modes.length)];
-
-	if (chosenMode == "power-up") {
-		let sweepNumToAdd =
-			difficulty == "easy"
-				? 1
-				: difficulty == "medium"
-				? 2
-				: difficulty == "hard"
-				? 3
-				: "";
-		console.log("powerup");
-		randomText.innerText = "Power-Up!";
-		randomDesc.innerText = `${sweepNumToAdd} Sweepers Added!`;
-		for (let i = 0; i < sweepNumToAdd; i++) {
-			addSweeper();
-		}
-	} else if (chosenMode == "bomb") {
-		console.log("bomb");
-		randomText.innerText = "Bomb!";
-		randomDesc.innerText = "Blasting off some blocks!";
-	} else if (chosenMode == "speed-up") {
-		console.log("speed-up");
-		randomText.innerText = "Speed-Up!";
-		randomDesc.innerText = "Turbooooooo!";
-		speedUp();
-	} else if (chosenMode == "grey-block") {
-		console.log("grey-block");
-		randomText.innerText = "Grey Blocks!";
-		randomDesc.innerText = "Here comes another row!";
-	} else if (chosenMode == "score-plus") {
-		console.log("score-plus");
-		randomText.innerText = "Score Plus!";
-		randomDesc.innerText = "3X the next score you gain!";
-		scorePlusOn = true;
-	}
-
-	// Animating, fading Random Mode Text
-	randomText.classList.add("animateMode");
-	randomText.classList.add(chosenMode);
-	randomDesc.classList.add(chosenMode);
-
-	setTimeout(() => {
-		randomText.classList.remove("animateMode");
-
-		setTimeout(() => {
-			randomText.classList.add("fade");
-			randomDesc.classList.add("fade");
-		}, 1000);
-
-		setTimeout(() => {
-			randomText.innerHTML = "";
-			randomDesc.innerHTML = "";
-			randomText.className = "";
-			randomDesc.className = "";
-		}, 4000);
-	}, 6000);
-
-	randomCount++;
-}
-
-function speedUp() {
-	let originalDrop = dropInterval;
-	dropInterval -= 200;
-
-	setTimeout(() => {
-		dropInterval = originalDrop;
-	}, 8000);
-}
-
-function addGreyBlocks() {}
-
-function addBombPiece() {}
-
 function arenaSweep() {
 	outer: for (let y = arena.length - 1; y > 0; y--) {
 		for (let x = 0; x < arena[y].length; x++) {
-			if (arena[y][x] === 0) {
+			if (arena[y][x] === 0 || arena[y][x] !== 8) {
 				continue outer;
 			}
 		}
@@ -473,9 +312,16 @@ function drawMatrix(matrix, offset) {
 	matrix.forEach((row, y) => {
 		row.forEach((value, x) => {
 			if (value !== 0) {
+				// if (value !== 0 && value !== 8) {
 				context.fillStyle = colors[value];
 				context.fillRect(x + offset.x, y + offset.y, 1, 1);
 			}
+			// if (value === 8) {
+			// 	context.fillStyle = colors[value];
+			// 	context.fillRect(x + offset.x, y + offset.y, 0.9, 0.9);
+			// 	context.strokeStyle = "black";
+			// 	context.strokeRect(x + offset.x, y + offset.y, 0.01, 0.05);
+			// }
 		});
 	});
 }
@@ -512,7 +358,6 @@ function playerMove(dir) {
 }
 
 function playerReset() {
-	const pieces = "ILJOTSZ";
 	player.matrix = createPiece(pieces[(pieces.length * Math.random()) | 0]);
 	player.pos.y = 0;
 	player.pos.x =
@@ -524,10 +369,10 @@ function playerReset() {
 		tetrisMusic.currentTime = 0;
 		gameOverMusic.play();
 
-		// Stop randomMode timers
+		// Stop randomEvents timers
 		if (difficulty == "hard") {
-			clearInterval(gameModeInterval);
-			gameModeCall ? gameModeCall.pause() : "";
+			clearInterval(gameEventsInterval);
+			gameEventsCall ? gameEventsCall.pause() : "";
 			randomText.innerText = "";
 		}
 
@@ -561,7 +406,10 @@ function playerReset() {
 
 function restartGame(val) {
 	arena.forEach(row => row.fill(0));
-	player.score, player.sweeper, timeCounter, (randomCount = 0);
+	player.score = 0;
+	player.sweeper = 0;
+	timeCounter = 0;
+	randomCount = 0;
 
 	renderSweeper();
 
@@ -572,11 +420,11 @@ function restartGame(val) {
 	} else {
 		gamePaused = false;
 		startGame(difficulty);
-		clearInterval(gameModeInterval);
-		gameModeInterval = 0;
-		if (gameModeCall) {
-			gameModeCall.pause();
-			gameModeCall = null;
+		clearInterval(gameEventsInterval);
+		gameEventsInterval = 0;
+		if (gameEventsCall) {
+			gameEventsCall.pause();
+			gameEventsCall = null;
 		}
 	}
 
@@ -645,7 +493,14 @@ function updateTime() {
 			}
 		}, 1000);
 	}
+	if (gameOver) {
+		console.log("Game over");
+		timeCounter = 0;
+	}
 }
+
+// Sweepers
+// ==================================
 
 function updateSweepers() {
 	// Check Score
@@ -719,5 +574,231 @@ function renderSweeper() {
 	}
 	if (player.sweeper < 1) {
 		sweeperDisplay.innerText = "No Sweepers Available";
+	}
+}
+
+// Hard Mode: Random Events
+// ==================================
+
+function randomEvents() {
+	console.log("random");
+	let animationCount = 0;
+
+	randomText.addEventListener(animationEvent, e => {
+		animationCount++;
+
+		if (animationCount === 1) {
+			animateToFade();
+		} else if (animationCount === 2) {
+			clearRandomText(randomText);
+			clearRandomText(randomDesc);
+			animationCount = 0;
+		} else {
+			console.log(animationCount);
+		}
+	});
+
+	gameEventsInterval = setInterval(() => {
+		let rdmDelay = Math.floor(Math.random() * (maxDelay - minDelay) + minDelay);
+
+		gameEventsCall = new timer(() => {
+			getEvent();
+		}, rdmDelay);
+		gameEventsCall.start();
+		console.log(gameEventsCall);
+	}, eventMinInterval);
+}
+
+let timer = function(callback, delay) {
+	var id = timeCounter.toString(),
+		started,
+		remaining = delay,
+		running;
+
+	this.id = id;
+	this.remaining = remaining;
+	this.callback = callback;
+
+	this.start = function() {
+		running = true;
+		started = new Date();
+		id = setTimeout(this.callback, remaining);
+	};
+
+	this.pause = function() {
+		running = false;
+		clearTimeout(id);
+		remaining -= new Date() - started;
+	};
+
+	this.getTimeLeft = function() {
+		if (running) {
+			this.pause();
+			this.start();
+		}
+
+		return remaining;
+	};
+
+	this.getID = function() {
+		if (running) {
+			return id;
+		} else {
+			return "Not Running";
+		}
+	};
+
+	this.getStateRunning = function() {
+		return running;
+	};
+};
+
+function getEvent() {
+	const events = [
+		"power-up",
+		"grey-block",
+		"score-plus",
+		"grey-block",
+		"grey-block"
+	];
+	let chosenEvent = events[random.integer(0, events.length)];
+
+	if (chosenEvent == "power-up") {
+		let sweepNumToAdd =
+			difficulty == "easy"
+				? 1
+				: difficulty == "medium"
+				? 2
+				: difficulty == "hard"
+				? 3
+				: "";
+		console.log("powerup");
+		randomText.innerText = "Power-Up!";
+		randomDesc.innerText = `${sweepNumToAdd} Sweepers Added!`;
+		for (let i = 0; i < sweepNumToAdd; i++) {
+			addSweeper();
+		}
+	} else if (chosenEvent == "bomb") {
+		console.log("bomb");
+		randomText.innerText = "Bomb!";
+		randomDesc.innerText = "Blasting off some blocks!";
+	} else if (chosenEvent == "speed-up") {
+		console.log("speed-up");
+		randomText.innerText = "Speed-Up!";
+		randomDesc.innerText = "Turbooooooo!";
+		speedUp();
+	} else if (chosenEvent == "grey-block") {
+		console.log("grey-block");
+		randomText.innerText = "Grey Blocks!";
+		randomDesc.innerText = "Here comes another row!";
+		addGreyBlocks();
+	} else if (chosenEvent == "score-plus") {
+		console.log("score-plus");
+		randomText.innerText = "Score Plus!";
+		randomDesc.innerText = "3X the next score you gain!";
+		scorePlusOn = true;
+	}
+
+	// Start flashfade animation
+	randomText.classList.add("animateMode");
+	randomText.classList.add(chosenEvent);
+	randomDesc.classList.add(chosenEvent);
+
+	randomCount++;
+}
+
+//David Walsh
+//https://davidwalsh.name/css-animation-callback
+function whichAnimationEvent() {
+	var a;
+	var el = document.createElement("fakeelement");
+	var animations = {
+		animation: "animationend",
+		OAnimation: "oAnimationEnd",
+		MozAnimation: "animationend",
+		WebkitAnimation: "webkitAnimationEnd"
+	};
+
+	for (a in animations) {
+		if (el.style[a] !== undefined) {
+			return animations[a];
+		}
+	}
+}
+
+function animateToFade() {
+	randomText.classList.remove("animateMode");
+	randomFade();
+}
+
+function clearRandomText(item) {
+	item.innerHTML = "";
+	item.className = "";
+}
+
+function randomFade() {
+	console.log(`gamePaused ${gamePaused}`);
+	if (!gamePaused) {
+		setTimeout(() => {
+			randomText.classList.add("fade");
+			randomDesc.classList.add("fade");
+		}, 1000);
+	}
+}
+
+function speedUp() {
+	let originalDrop = dropInterval;
+	dropInterval -= 200;
+
+	setTimeout(() => {
+		dropInterval = originalDrop;
+	}, 8000);
+}
+
+function addGreyBlocks() {
+	//
+	let greyMatrix = Array(arena[0].length).fill(8);
+	arena.shift();
+	arena.push(greyMatrix);
+}
+
+function addBombPiece() {
+	// Set range of X, and y value for drawing bomb
+	// Make bomb have additional gravity
+	// Check collision
+}
+
+function pauseUnpauseRandomInterval() {
+	if (!gamePaused) {
+		//pausing
+		if (gameEventsCall) {
+			gameEventsCall.pause();
+		}
+		clearInterval(gameEventsInterval);
+
+		// Pause flashfade animations
+		randomText.classList.add("paused");
+		randomDesc.classList.add("paused");
+	} else {
+		//unpause
+		if (gameEventsCall) {
+			var timeRemaining = gameEventsCall.getTimeLeft();
+
+			console.log(timeRemaining);
+			if (timeRemaining > 0) {
+				gameEventsCall.start();
+			}
+
+			[randomText, randomDesc].forEach(item => {
+				item.classList.remove("paused");
+				item.classList.add("running");
+			});
+		} else {
+			var timeRemaining = 3000;
+		}
+
+		setTimeout(() => {
+			randomEvents();
+		}, timeRemaining + 1000);
 	}
 }

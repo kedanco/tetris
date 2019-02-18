@@ -297,7 +297,7 @@ canvas {
 #random-text {
 	font-family: "Quicksand", sans-serif;
 	padding: 20px;
-	font-size: 30px;
+	font-size: 36px;
 	font-weight: bold;
 	text-shadow: 0px 2px 3px #222;
 }
@@ -337,11 +337,58 @@ canvas {
 	animation: 2s linear 0s 1 normal forwards flashfade;
 }
 
+.pause {
+	-webkit-animation-play-state: paused;
+	-moz-animation-play-state: paused;
+	-o-animation-play-state: paused;
+	animation-play-state: paused;
+}
+
+.running {
+	-webkit-animation-play-state: running;
+	-moz-animation-play-state: running;
+	-o-animation-play-state: running;
+	animation-play-state: running;
+}
+
 @keyframes flashfade {
 	from {
 		opacity: 1;
 	}
 	to {
 		opacity: 0;
+	}
+}
+
+@media (max-width: 1024px) {
+	#right-bar {
+		padding: 20px;
+	}
+
+	#random-text {
+		font-size: 32px;
+	}
+}
+
+@media (max-width: 830px) {
+	#controls-options {
+		font-size: 14px;
+		padding: 30px;
+	}
+
+	#right-bar {
+		padding: 5px;
+	}
+
+	#random-title {
+		font-size: 20px;
+	}
+
+	#random-text {
+		font-size: 26px;
+	}
+
+	.bulldozer {
+		transform: scale(0.75);
 	}
 }
