@@ -252,16 +252,17 @@ function arenaSweep() {
 		arena.unshift(row);
 		y++;
 
-		player.score += (rowCount + scoreMultiplier) * 10;
+		let rowAdder = scoreMultiplier;
+
+		player.score += (rowCount + rowAdder) * 10;
 		if (scorePlusOn) {
-			player.score += (rowCount + scoreMultiplier) * 10 * 2;
+			player.score += (rowCount + rowAdder) * 10 * 2;
 			scorePlusOn = false;
 		}
-		scoreMultiplier += scoreMultiplier;
-
+		rowAdder += scoreMultiplier;
+		rowCount++;
 		// Interval of Sweeper Redemption follows scoreMultiplier
 		scoreInterval *= 1.1;
-		console.log(`rowCount ` + rowCount);
 	}
 }
 
@@ -390,8 +391,9 @@ function playerReset() {
 			console.log("setting high score");
 			localStorage.setItem("tetrisHighScore", player.score);
 			localStorage.setItem("tetrisEndTime", timeCounter);
+			localStorage.setItem("tetrisRowCount", rowCount);
 		} else {
-			console.log("you weak");
+			console.log("No records added.");
 		}
 
 		// Display Game Over Overlay
@@ -405,6 +407,9 @@ function playerReset() {
 		document.getElementById(
 			"gameover-random"
 		).innerText = `Random Events: ${randomCount}`;
+		document.getElementById(
+			"gameover-rows"
+		).innerText = `Rows Cleared: ${rowCount - 1}`;
 	}
 }
 
