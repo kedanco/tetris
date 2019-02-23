@@ -31,6 +31,7 @@ let difficulty = "easy",
 	timeCounter = 0,
 	rowCount = 1,
 	scoreMultiplier = 2,
+	streak = 0,
 	dropCounter = 0,
 	lastTime = 0,
 	dropInterval = 1000,
@@ -241,6 +242,7 @@ function pauseUnpauseMusic(src = "music") {
 }
 
 function arenaSweep() {
+	let rowCleared = 0;
 	outer: for (let y = arena.length - 1; y > 0; y--) {
 		for (let x = 0; x < arena[y].length; x++) {
 			if (arena[y][x] === 0 || arena[y][x] === 8) {
@@ -261,9 +263,11 @@ function arenaSweep() {
 		}
 		rowAdder += scoreMultiplier;
 		rowCount++;
+		rowCleared++;
 		// Interval of Sweeper Redemption follows scoreMultiplier
 		scoreInterval *= 1.1;
 	}
+	return rowCleared;
 }
 
 function collide(arena, player) {
@@ -345,14 +349,27 @@ function merge(arena, player) {
 function playerDrop() {
 	// console.log("drop");
 	player.pos.y++;
+	let rowCleared = 0;
 	if (collide(arena, player)) {
 		player.pos.y--;
 		merge(arena, player);
 		playerReset();
-		arenaSweep();
+		rowCleared = arenaSweep();
 		updateScore();
+
+		rowCleared > 0 ? (streak += rowCleared) : (streak = 0);
+		if (streak > 2) streakCombo(streak);
+		console.log(streak);
 	}
 	dropCounter = 0;
+}
+
+function streakCombo(st) {
+	let comboScore = Math.round((st * scoreInterval) / 2);
+	player.score += comboScore;
+	console.log(`Streak: ${st}, ${comboScore} added!`);
+
+	// Run Bonus Animation
 }
 
 function playerMove(dir) {

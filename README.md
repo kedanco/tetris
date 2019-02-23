@@ -20,5 +20,5 @@ Initial Game completed following **Meth Meth Method**'s tutorial on Youtube:
 - [x] Random Mode: Score Multiplier Bonus
 - [x] Random Mode: Bottom Row Addition (Grey Blocks)
 - [ ] Danger Animation
-- [ ] Random Mode: Bomb Block (Destroy Blocks)
+- [ ] Combo Bonus Animation
 - [ ] Code Refactor with random.js
