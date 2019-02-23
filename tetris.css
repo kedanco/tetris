@@ -337,7 +337,7 @@ canvas {
 	animation: 2s linear 0s 1 normal forwards flashfade;
 }
 
-.pause {
+.paused {
 	-webkit-animation-play-state: paused;
 	-moz-animation-play-state: paused;
 	-o-animation-play-state: paused;

@@ -41,6 +41,7 @@ let difficulty = "easy",
 	gameEventsInterval = 0,
 	gameEventsCall,
 	animationEvent,
+	timerList = [],
 	pauseOverlay = document.getElementById("pause"),
 	gameoverOverlay = document.getElementById("gameover"),
 	btnPause = document.getElementById("btn-pause"),
@@ -251,15 +252,16 @@ function arenaSweep() {
 		arena.unshift(row);
 		y++;
 
-		player.score += rowCount * 10;
+		player.score += (rowCount + scoreMultiplier) * 10;
 		if (scorePlusOn) {
-			player.score += rowCount * 10 * 2;
+			player.score += (rowCount + scoreMultiplier) * 10 * 2;
 			scorePlusOn = false;
 		}
-		rowCount += scoreMultiplier;
+		scoreMultiplier += scoreMultiplier;
 
 		// Interval of Sweeper Redemption follows scoreMultiplier
 		scoreInterval *= 1.1;
+		console.log(`rowCount ` + rowCount);
 	}
 }
 
@@ -584,21 +586,7 @@ function renderSweeper() {
 
 function randomEvents() {
 	console.log("random");
-	let animationCount = 0;
-
-	randomText.addEventListener(animationEvent, e => {
-		animationCount++;
-
-		if (animationCount === 1) {
-			animateToFade();
-		} else if (animationCount === 2) {
-			clearRandomText(randomText);
-			clearRandomText(randomDesc);
-			animationCount = 0;
-		} else {
-			console.log(animationCount);
-		}
-	});
+	randomText.addEventListener(animationEvent, e => eventSetup(e), true);
 
 	gameEventsInterval = setInterval(() => {
 		let rdmDelay = Math.floor(Math.random() * (maxDelay - minDelay) + minDelay);
@@ -607,8 +595,20 @@ function randomEvents() {
 			getEvent();
 		}, rdmDelay);
 		gameEventsCall.start();
-		console.log(gameEventsCall);
+		timerList.push(gameEventsCall);
+		if (timerList.length > 2) {
+			getEvent();
+		}
 	}, eventMinInterval);
+}
+
+function eventSetup(e) {
+	if (randomText.className.includes("animateMode")) {
+		animateToFade();
+	} else if (randomText.className.includes("fade")) {
+		clearRandomText(randomText);
+		clearRandomText(randomDesc);
+	}
 }
 
 let timer = function(callback, delay) {
@@ -656,11 +656,12 @@ let timer = function(callback, delay) {
 };
 
 function getEvent() {
+	timerList = [];
 	const events = [
 		"power-up",
 		"grey-block",
 		"score-plus",
-		"grey-block",
+		"speed-up",
 		"grey-block"
 	];
 	let chosenEvent = events[random.integer(0, events.length)];
@@ -701,7 +702,7 @@ function getEvent() {
 		scorePlusOn = true;
 	}
 
-	// Start flashfade animation
+	// Start flashing animation
 	randomText.classList.add("animateMode");
 	randomText.classList.add(chosenEvent);
 	randomDesc.classList.add(chosenEvent);
@@ -733,19 +734,20 @@ function animateToFade() {
 	randomFade();
 }
 
-function clearRandomText(item) {
-	item.innerHTML = "";
-	item.className = "";
-}
-
 function randomFade() {
-	console.log(`gamePaused ${gamePaused}`);
+	console.log(`randomFade`);
 	if (!gamePaused) {
+		randomText.removeEventListener(animationEvent, eventSetup, true);
 		setTimeout(() => {
 			randomText.classList.add("fade");
 			randomDesc.classList.add("fade");
 		}, 1000);
 	}
+}
+
+function clearRandomText(item) {
+	item.innerHTML = "";
+	item.className = "";
 }
 
 function speedUp() {
@@ -765,6 +767,7 @@ function addGreyBlocks() {
 }
 
 function addBombPiece() {
+	// TODO
 	// Set range of X, and y value for drawing bomb
 	// Make bomb have additional gravity
 	// Check collision
@@ -772,15 +775,25 @@ function addBombPiece() {
 
 function pauseUnpauseRandomInterval() {
 	if (!gamePaused) {
+		console.log("pausing");
 		//pausing
-		if (gameEventsCall) {
+		if (gameEventsCall === undefined || gameEventsCall === null) {
+			setInterval(() => {
+				if (gameEventsCall) {
+					gameEventsCall.pause();
+				}
+			}, 6000);
+		} else {
 			gameEventsCall.pause();
 		}
+
 		clearInterval(gameEventsInterval);
 
 		// Pause flashfade animations
-		randomText.classList.add("paused");
-		randomDesc.classList.add("paused");
+		[randomText, randomDesc].forEach(item => {
+			item.classList.remove("running");
+			item.classList.add("paused");
+		});
 	} else {
 		//unpause
 		if (gameEventsCall) {
@@ -798,6 +811,8 @@ function pauseUnpauseRandomInterval() {
 		} else {
 			var timeRemaining = 3000;
 		}
+
+		randomText.removeEventListener(animationEvent, eventSetup, true);
 
 		setTimeout(() => {
 			randomEvents();
