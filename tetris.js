@@ -242,7 +242,7 @@ function pauseUnpauseMusic(src = "music") {
 function arenaSweep() {
 	outer: for (let y = arena.length - 1; y > 0; y--) {
 		for (let x = 0; x < arena[y].length; x++) {
-			if (arena[y][x] === 0 || arena[y][x] !== 8) {
+			if (arena[y][x] === 0 || arena[y][x] === 8) {
 				continue outer;
 			}
 		}
@@ -311,17 +311,19 @@ function draw() {
 function drawMatrix(matrix, offset) {
 	matrix.forEach((row, y) => {
 		row.forEach((value, x) => {
-			if (value !== 0) {
-				// if (value !== 0 && value !== 8) {
+			// if (value !== 0) {
+			if (value !== 0 && value !== 8) {
 				context.fillStyle = colors[value];
 				context.fillRect(x + offset.x, y + offset.y, 1, 1);
 			}
-			// if (value === 8) {
-			// 	context.fillStyle = colors[value];
-			// 	context.fillRect(x + offset.x, y + offset.y, 0.9, 0.9);
-			// 	context.strokeStyle = "black";
-			// 	context.strokeRect(x + offset.x, y + offset.y, 0.01, 0.05);
-			// }
+			// Add stroke for greyblocks
+			if (value === 8) {
+				context.fillStyle = colors[value];
+				context.fillRect(x + offset.x, y + offset.y, 1, 1);
+				context.strokeStyle = "black";
+				context.lineWidth = 0.03;
+				context.strokeRect(x + offset.x, y + offset.y, 1, 1);
+			}
 		});
 	});
 }
@@ -419,9 +421,9 @@ function restartGame(val) {
 		gamePaused = true;
 	} else {
 		gamePaused = false;
-		startGame(difficulty);
 		clearInterval(gameEventsInterval);
 		gameEventsInterval = 0;
+		startGame(difficulty);
 		if (gameEventsCall) {
 			gameEventsCall.pause();
 			gameEventsCall = null;

@@ -18,7 +18,7 @@ Initial Game completed following **Meth Meth Method**'s tutorial on Youtube:
 - [x] Random Mode: Receive 3 Extra Power-up
 - [x] Random Mode: Speed Increase
 - [x] Random Mode: Score Multiplier Bonus
+- [x] Random Mode: Bottom Row Addition (Grey Blocks)
 - [ ] Danger Animation
-- [ ] Random Mode: Bottom Row Addition (Grey Blocks)
 - [ ] Random Mode: Bomb Block (Destroy Blocks)
 - [ ] Code Refactor with random.js
