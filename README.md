@@ -19,6 +19,7 @@ Initial Game completed following **Meth Meth Method**'s tutorial on Youtube:
 - [x] Random Mode: Speed Increase
 - [x] Random Mode: Score Multiplier Bonus
 - [x] Random Mode: Bottom Row Addition (Grey Blocks)
-- [ ] Danger Animation
 - [ ] Combo Bonus Animation
+- [ ] Danger Animation
+- [ ] Display Previous High Score
 - [ ] Code Refactor with random.js

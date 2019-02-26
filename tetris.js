@@ -32,6 +32,7 @@ let difficulty = "easy",
 	rowCount = 1,
 	scoreMultiplier = 2,
 	streak = 0,
+	danger = false,
 	dropCounter = 0,
 	lastTime = 0,
 	dropInterval = 1000,
@@ -43,18 +44,19 @@ let difficulty = "easy",
 	gameEventsCall,
 	animationEvent,
 	timerList = [],
-	pauseOverlay = document.getElementById("pause"),
-	gameoverOverlay = document.getElementById("gameover"),
-	btnPause = document.getElementById("btn-pause"),
-	btnMute = document.getElementById("btn-mute"),
-	btnMenu = document.getElementById("btn-menu"),
-	btnRestart = document.getElementById("btn-restart"),
-	sweeperDisplay = document.getElementById("sweeper-count"),
-	difficultyMenu = document.getElementById("difficulty"),
-	gameElements = document.getElementsByClassName("hide"),
-	displayMode = document.getElementById("display-mode"),
-	randomText = document.getElementById("random-text"),
-	randomDesc = document.getElementById("random-description");
+	dangerDiv = document.getElementById("danger");
+(pauseOverlay = document.getElementById("pause")),
+	(gameoverOverlay = document.getElementById("gameover")),
+	(btnPause = document.getElementById("btn-pause")),
+	(btnMute = document.getElementById("btn-mute")),
+	(btnMenu = document.getElementById("btn-menu")),
+	(btnRestart = document.getElementById("btn-restart")),
+	(sweeperDisplay = document.getElementById("sweeper-count")),
+	(difficultyMenu = document.getElementById("difficulty")),
+	(gameElements = document.getElementsByClassName("hide")),
+	(displayMode = document.getElementById("display-mode")),
+	(randomText = document.getElementById("random-text")),
+	(randomDesc = document.getElementById("random-description"));
 
 let bulldozer = new Image(60, 60);
 bulldozer.src = "./bulldozer-left.png";
@@ -275,11 +277,29 @@ function collide(arena, player) {
 	for (let y = 0; y < m.length; y++) {
 		for (let x = 0; x < m[y].length; x++) {
 			if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
+				if (o.y < 6 && !danger) {
+					danger = true;
+					console.log("danger");
+					dangerDiv.classList.remove("hide");
+
+					dangerDiv.addEventListener("animationend", () => animateDangerCall());
+					dangerDiv.classList.add("animateDanger");
+				}
+				if (o.y > 6) {
+					console.log("no danger");
+					danger = false;
+				}
 				return true;
 			}
 		}
 	}
 	return false;
+}
+
+function animateDangerCall() {
+	dangerDiv.classList.remove("animateDanger");
+	dangerDiv.classList.add("fade");
+	dangerDiv.removeEventListener("animationend", animateDangerCall);
 }
 
 function createMatrix(w, h) {
@@ -358,18 +378,27 @@ function playerDrop() {
 		updateScore();
 
 		rowCleared > 0 ? (streak += rowCleared) : (streak = 0);
-		if (streak > 2) streakCombo(streak);
-		console.log(streak);
+		if (streak > 1) streakCombo(streak);
 	}
 	dropCounter = 0;
 }
 
 function streakCombo(st) {
+	console.log(st);
+	document.querySelector("#combo-number").innerText = st;
 	let comboScore = Math.round((st * scoreInterval) / 2);
 	player.score += comboScore;
 	console.log(`Streak: ${st}, ${comboScore} added!`);
+	document.querySelector("#bonus-score").innerText = comboScore;
 
 	// Run Bonus Animation
+	document.querySelector("#bonus").addEventListener("animationend", () => {
+		console.log("event ended");
+	});
+
+	document.querySelector("#bonus").classList.toggle("hide");
+
+	document.querySelector("#bonus").classList.add("bonus-animation");
 }
 
 function playerMove(dir) {
@@ -438,6 +467,7 @@ function restartGame(val) {
 	randomCount = 0;
 
 	renderSweeper();
+	document.querySelector("#danger").className = "animated-text hide";
 
 	document.getElementById("time").innerHTML = "0:00";
 	gameOver = false;
@@ -514,7 +544,6 @@ function updateTime() {
 				}
 				document.getElementById("time").innerHTML = `${minutes}:${seconds}`;
 			} else if (gameOver) {
-				console.log("remove time");
 				clearInterval(x);
 			}
 		}, 1000);
