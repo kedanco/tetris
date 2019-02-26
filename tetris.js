@@ -44,19 +44,20 @@ let difficulty = "easy",
 	gameEventsCall,
 	animationEvent,
 	timerList = [],
-	dangerDiv = document.getElementById("danger");
-(pauseOverlay = document.getElementById("pause")),
-	(gameoverOverlay = document.getElementById("gameover")),
-	(btnPause = document.getElementById("btn-pause")),
-	(btnMute = document.getElementById("btn-mute")),
-	(btnMenu = document.getElementById("btn-menu")),
-	(btnRestart = document.getElementById("btn-restart")),
-	(sweeperDisplay = document.getElementById("sweeper-count")),
-	(difficultyMenu = document.getElementById("difficulty")),
-	(gameElements = document.getElementsByClassName("hide")),
-	(displayMode = document.getElementById("display-mode")),
-	(randomText = document.getElementById("random-text")),
-	(randomDesc = document.getElementById("random-description"));
+	dangerDiv = document.getElementById("danger"),
+	bonusDiv = document.getElementById("bonus"),
+	pauseOverlay = document.getElementById("pause"),
+	gameoverOverlay = document.getElementById("gameover"),
+	btnPause = document.getElementById("btn-pause"),
+	btnMute = document.getElementById("btn-mute"),
+	btnMenu = document.getElementById("btn-menu"),
+	btnRestart = document.getElementById("btn-restart"),
+	sweeperDisplay = document.getElementById("sweeper-count"),
+	difficultyMenu = document.getElementById("difficulty"),
+	gameElements = document.getElementsByClassName("hide"),
+	displayMode = document.getElementById("display-mode"),
+	randomText = document.getElementById("random-text"),
+	randomDesc = document.getElementById("random-description");
 
 let bulldozer = new Image(60, 60);
 bulldozer.src = "./bulldozer-left.png";
@@ -156,6 +157,7 @@ function toggleMenu() {
 		diffButton.innerText = "MEDIUM";
 		diffButton.className = "medium";
 	} else if (difficulty == "hard") {
+		document.querySelector("#random-mode").classList.toggle("hide");
 		diffButton.innerText = "HARD";
 		diffButton.className = "hard";
 	}
@@ -277,29 +279,11 @@ function collide(arena, player) {
 	for (let y = 0; y < m.length; y++) {
 		for (let x = 0; x < m[y].length; x++) {
 			if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
-				if (o.y < 6 && !danger) {
-					danger = true;
-					console.log("danger");
-					dangerDiv.classList.remove("hide");
-
-					dangerDiv.addEventListener("animationend", () => animateDangerCall());
-					dangerDiv.classList.add("animateDanger");
-				}
-				if (o.y > 6) {
-					console.log("no danger");
-					danger = false;
-				}
 				return true;
 			}
 		}
 	}
 	return false;
-}
-
-function animateDangerCall() {
-	dangerDiv.classList.remove("animateDanger");
-	dangerDiv.classList.add("fade");
-	dangerDiv.removeEventListener("animationend", animateDangerCall);
 }
 
 function createMatrix(w, h) {
@@ -364,6 +348,24 @@ function merge(arena, player) {
 			}
 		});
 	});
+	if (player.pos.y < 6 && !danger) {
+		danger = true;
+		console.log("danger");
+		dangerDiv.className = "animated-text";
+
+		dangerDiv.addEventListener("animationend", () => animateDangerCall());
+		dangerDiv.classList.add("animateMode");
+	}
+	if (player.pos.y > 6) {
+		dangerDiv.classList.add("hide");
+		danger = false;
+	}
+}
+
+function animateDangerCall() {
+	dangerDiv.classList.remove("animateMode");
+	dangerDiv.classList.add("fade");
+	dangerDiv.removeEventListener("animationend", animateDangerCall);
 }
 
 function playerDrop() {
@@ -392,13 +394,26 @@ function streakCombo(st) {
 	document.querySelector("#bonus-score").innerText = comboScore;
 
 	// Run Bonus Animation
-	document.querySelector("#bonus").addEventListener("animationend", () => {
-		console.log("event ended");
-	});
+	bonusDiv.addEventListener("animationend", () => bonusAnimationCall());
 
-	document.querySelector("#bonus").classList.toggle("hide");
+	console.log("bonus start");
+	bonusDiv.classList.remove("hide");
+	// if (bonusDiv.className.includes('bonus-animation') || bonusDiv.className.includes('fade'))
+	if ((bonusDiv.style.animationPlayState = "running")) {
+		bonusDiv.className = "animated-text";
+	}
+	bonusDiv.classList.add("bonus-animation");
+}
 
-	document.querySelector("#bonus").classList.add("bonus-animation");
+function bonusAnimationCall() {
+	console.log("bonus animation end");
+	if (bonusDiv.className.includes("bonus-animation")) {
+		bonusDiv.classList.remove("bonus-animation");
+		bonusDiv.classList.add("fade");
+	} else {
+		bonusDiv.className = "animated-text hide";
+		bonusDiv.removeEventListener("animationend", bonusAnimationCall);
+	}
 }
 
 function playerMove(dir) {
@@ -426,6 +441,13 @@ function playerReset() {
 			gameEventsCall ? gameEventsCall.pause() : "";
 			randomText.innerText = "";
 		}
+
+		// Stop Animations
+		stopAnimation("fade");
+		stopAnimation("animateMode");
+		stopAnimation("bonus-animation");
+		dangerDiv.classList.add("hide");
+		bonusDiv.classList.add("hide");
 
 		// Update High Score
 		let highScore = localStorage.getItem("tetrisHighScore");
@@ -457,6 +479,13 @@ function playerReset() {
 			"gameover-rows"
 		).innerText = `Rows Cleared: ${rowCount - 1}`;
 	}
+}
+
+function stopAnimation(cls) {
+	console.log(`stopping ${cls}`);
+	[...document.getElementsByClassName(cls)].forEach(item => {
+		item.classList.remove(cls);
+	});
 }
 
 function restartGame(val) {
@@ -708,23 +737,15 @@ let timer = function(callback, delay) {
 
 function getEvent() {
 	timerList = [];
-	const events = [
-		"power-up",
-		"grey-block",
-		"score-plus",
-		"speed-up",
-		"grey-block"
-	];
+	const events = ["power-up", "grey-block", "score-plus", "speed-up"];
 	let chosenEvent = events[random.integer(0, events.length)];
 
 	if (chosenEvent == "power-up") {
 		let sweepNumToAdd =
-			difficulty == "easy"
-				? 1
-				: difficulty == "medium"
+			difficulty == "easy" || difficulty == "medium"
 				? 2
 				: difficulty == "hard"
-				? 3
+				? 1
 				: "";
 		console.log("powerup");
 		randomText.innerText = "Power-Up!";
@@ -732,10 +753,6 @@ function getEvent() {
 		for (let i = 0; i < sweepNumToAdd; i++) {
 			addSweeper();
 		}
-	} else if (chosenEvent == "bomb") {
-		console.log("bomb");
-		randomText.innerText = "Bomb!";
-		randomDesc.innerText = "Blasting off some blocks!";
 	} else if (chosenEvent == "speed-up") {
 		console.log("speed-up");
 		randomText.innerText = "Speed-Up!";
@@ -815,13 +832,6 @@ function addGreyBlocks() {
 	let greyMatrix = Array(arena[0].length).fill(8);
 	arena.shift();
 	arena.push(greyMatrix);
-}
-
-function addBombPiece() {
-	// TODO
-	// Set range of X, and y value for drawing bomb
-	// Make bomb have additional gravity
-	// Check collision
 }
 
 function pauseUnpauseRandomInterval() {
