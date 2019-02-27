@@ -50,8 +50,8 @@ let difficulty = "easy",
 	gameoverOverlay = document.getElementById("gameover"),
 	btnPause = document.getElementById("btn-pause"),
 	btnMute = document.getElementById("btn-mute"),
-	btnMenu = document.getElementById("btn-menu"),
-	btnRestart = document.getElementById("btn-restart"),
+	btnMenus = [...document.getElementsByClassName("btn-menu")],
+	btnRestarts = [...document.getElementsByClassName("btn-restart")],
 	sweeperDisplay = document.getElementById("sweeper-count"),
 	difficultyMenu = document.getElementById("difficulty"),
 	gameElements = document.getElementsByClassName("hide"),
@@ -89,13 +89,17 @@ btnPause.addEventListener("click", e => pauseUnpauseGame());
 
 btnMute.addEventListener("click", e => pauseUnpauseMusic());
 
-btnMenu.addEventListener("click", e => {
-	restartGame("main");
-	toggleMenu();
+btnMenus.forEach(item => {
+	item.addEventListener("click", e => {
+		restartGame("main");
+		toggleMenu();
+	});
 });
 
-btnRestart.addEventListener("click", e => {
-	restartGame("restart");
+btnRestarts.forEach(item => {
+	item.addEventListener("click", e => {
+		restartGame("restart");
+	});
 });
 
 document.addEventListener("keydown", event => {
@@ -142,7 +146,7 @@ function getDifficulty() {
 
 function toggleMenu() {
 	//should only touch visual elements
-	console.log("toggle");
+	// console.log("toggle");
 
 	[...document.getElementsByClassName("gameItem")].forEach(item => {
 		item.classList.toggle("hide");
@@ -265,7 +269,7 @@ function arenaSweep() {
 			player.score += (rowCount + rowAdder) * 10 * 2;
 			scorePlusOn = false;
 		}
-		rowAdder += scoreMultiplier;
+		rowAdder += scoreMultiplier / 2;
 		rowCount++;
 		rowCleared++;
 		// Interval of Sweeper Redemption follows scoreMultiplier
@@ -350,7 +354,6 @@ function merge(arena, player) {
 	});
 	if (player.pos.y < 6 && !danger) {
 		danger = true;
-		console.log("danger");
 		dangerDiv.className = "animated-text";
 
 		dangerDiv.addEventListener("animationend", () => animateDangerCall());
@@ -386,7 +389,7 @@ function playerDrop() {
 }
 
 function streakCombo(st) {
-	console.log(st);
+	highestStreak < st ? (highestStreak = st) : "";
 	document.querySelector("#combo-number").innerText = st;
 	let comboScore = Math.round((st * scoreInterval) / 2);
 	player.score += comboScore;
@@ -489,6 +492,8 @@ function stopAnimation(cls) {
 }
 
 function restartGame(val) {
+	gameOver = true;
+	console.log("restarting game...");
 	arena.forEach(row => row.fill(0));
 	player.score = 0;
 	player.sweeper = 0;
@@ -504,16 +509,19 @@ function restartGame(val) {
 		gamePaused = true;
 	} else {
 		gamePaused = false;
-		clearInterval(gameEventsInterval);
-		gameEventsInterval = 0;
-		startGame(difficulty);
-		if (gameEventsCall) {
-			gameEventsCall.pause();
-			gameEventsCall = null;
+		if (difficulty == "hard") {
+			clearInterval(gameEventsInterval);
+			gameEventsInterval = 0;
+			if (gameEventsCall) {
+				gameEventsCall.pause();
+				gameEventsCall = null;
+			}
 		}
+		startGame(difficulty);
 	}
 
 	gameoverOverlay.style.display = "none";
+	pauseOverlay.style.display = "none";
 }
 
 function playerRotate(dir) {
@@ -803,7 +811,7 @@ function animateToFade() {
 }
 
 function randomFade() {
-	console.log(`randomFade`);
+	// console.log(`randomFade`);
 	if (!gamePaused) {
 		randomText.removeEventListener(animationEvent, eventSetup, true);
 		setTimeout(() => {
