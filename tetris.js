@@ -32,6 +32,7 @@ let difficulty = "easy",
 	rowCount = 1,
 	scoreMultiplier = 2,
 	streak = 0,
+	highestStreak = 0,
 	danger = false,
 	dropCounter = 0,
 	lastTime = 0,
@@ -90,8 +91,8 @@ btnPause.addEventListener("click", e => pauseUnpauseGame());
 btnMute.addEventListener("click", e => pauseUnpauseMusic());
 
 btnMenu.addEventListener("click", e => {
+	toggleMenu(false);
 	restartGame("main");
-	toggleMenu();
 });
 
 btnRestart.addEventListener("click", e => {
@@ -134,32 +135,33 @@ function getDifficulty() {
 	[...document.getElementsByClassName("diff-buttons")].forEach(item => {
 		item.addEventListener("click", e => {
 			difficulty = e.target.value;
-			toggleMenu();
+			toggleMenu(true);
 			startGame();
 		});
 	});
 }
 
-function toggleMenu() {
+function toggleMenu(newGame) {
 	//should only touch visual elements
-	console.log("toggle");
 
 	[...document.getElementsByClassName("gameItem")].forEach(item => {
 		item.classList.toggle("hide");
 	});
 
-	let diffButton = document.getElementById("display-difficulty");
+	if (newGame) {
+		let diffButton = document.getElementById("display-difficulty");
 
-	if (difficulty == "easy") {
-		diffButton.innerText = "EASY";
-		diffButton.className = "easy";
-	} else if (difficulty == "medium") {
-		diffButton.innerText = "MEDIUM";
-		diffButton.className = "medium";
-	} else if (difficulty == "hard") {
-		document.querySelector("#random-mode").classList.toggle("hide");
-		diffButton.innerText = "HARD";
-		diffButton.className = "hard";
+		if (difficulty == "easy") {
+			diffButton.innerText = "EASY";
+			diffButton.className = "gameItem easy";
+		} else if (difficulty == "medium") {
+			diffButton.innerText = "MEDIUM";
+			diffButton.className = "gameItem medium";
+		} else if (difficulty == "hard") {
+			document.querySelector("#random-mode").classList.toggle("hide");
+			diffButton.innerText = "HARD";
+			diffButton.className = "gameItem hard";
+		}
 	}
 }
 
@@ -265,7 +267,7 @@ function arenaSweep() {
 			player.score += (rowCount + rowAdder) * 10 * 2;
 			scorePlusOn = false;
 		}
-		rowAdder += scoreMultiplier;
+		rowAdder += scoreMultiplier / 2;
 		rowCount++;
 		rowCleared++;
 		// Interval of Sweeper Redemption follows scoreMultiplier
@@ -350,7 +352,6 @@ function merge(arena, player) {
 	});
 	if (player.pos.y < 6 && !danger) {
 		danger = true;
-		console.log("danger");
 		dangerDiv.className = "animated-text";
 
 		dangerDiv.addEventListener("animationend", () => animateDangerCall());
@@ -386,17 +387,17 @@ function playerDrop() {
 }
 
 function streakCombo(st) {
-	console.log(st);
+	highestStreak < st ? (highestStreak = st) : "";
 	document.querySelector("#combo-number").innerText = st;
 	let comboScore = Math.round((st * scoreInterval) / 2);
 	player.score += comboScore;
 	console.log(`Streak: ${st}, ${comboScore} added!`);
 	document.querySelector("#bonus-score").innerText = comboScore;
+	updateScore();
 
 	// Run Bonus Animation
 	bonusDiv.addEventListener("animationend", () => bonusAnimationCall());
 
-	console.log("bonus start");
 	bonusDiv.classList.remove("hide");
 	// if (bonusDiv.className.includes('bonus-animation') || bonusDiv.className.includes('fade'))
 	if ((bonusDiv.style.animationPlayState = "running")) {
@@ -460,6 +461,7 @@ function playerReset() {
 			localStorage.setItem("tetrisHighScore", player.score);
 			localStorage.setItem("tetrisEndTime", timeCounter);
 			localStorage.setItem("tetrisRowCount", rowCount);
+			localStorage.setItem("tetrisStreak", highestStreak);
 		} else {
 			console.log("No records added.");
 		}
@@ -478,6 +480,9 @@ function playerReset() {
 		document.getElementById(
 			"gameover-rows"
 		).innerText = `Rows Cleared: ${rowCount - 1}`;
+		document.getElementById(
+			"gameover-streak"
+		).innerText = `Max Streak: ${highestStreak}`;
 	}
 }
 
