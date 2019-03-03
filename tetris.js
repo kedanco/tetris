@@ -93,7 +93,6 @@ btnPause.addEventListener("click", e => pauseUnpauseGame());
 
 btnMute.addEventListener("click", e => pauseUnpauseMusic());
 
-
 btnMenu.addEventListener("click", e => {
 	toggleMenu(false);
 	restartGame("main");
@@ -148,7 +147,6 @@ function getDifficulty() {
 		});
 	});
 }
-
 
 function toggleMenu(newGame) {
 	//should only touch visual elements
@@ -292,11 +290,29 @@ function collide(arena, player) {
 	for (let y = 0; y < m.length; y++) {
 		for (let x = 0; x < m[y].length; x++) {
 			if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
+				if (o.y < 6 && !danger) {
+					danger = true;
+					console.log("danger");
+					dangerDiv.classList.remove("hide");
+
+					dangerDiv.addEventListener("animationend", () => animateDangerCall());
+					dangerDiv.classList.add("animateDanger");
+				}
+				if (o.y > 6) {
+					console.log("no danger");
+					danger = false;
+				}
 				return true;
 			}
 		}
 	}
 	return false;
+}
+
+function animateDangerCall() {
+	dangerDiv.classList.remove("animateDanger");
+	dangerDiv.classList.add("fade");
+	dangerDiv.removeEventListener("animationend", animateDangerCall);
 }
 
 function createMatrix(w, h) {
@@ -407,28 +423,14 @@ function streakCombo(st) {
 
 	updateScore();
 
-
 	// Run Bonus Animation
-	bonusDiv.addEventListener("animationend", () => bonusAnimationCall());
+	document.querySelector("#bonus").addEventListener("animationend", () => {
+		console.log("event ended");
+	});
 
-	console.log("bonus start");
-	bonusDiv.classList.remove("hide");
-	// if (bonusDiv.className.includes('bonus-animation') || bonusDiv.className.includes('fade'))
-	if ((bonusDiv.style.animationPlayState = "running")) {
-		bonusDiv.className = "animated-text";
-	}
-	bonusDiv.classList.add("bonus-animation");
-}
+	document.querySelector("#bonus").classList.toggle("hide");
 
-function bonusAnimationCall() {
-	console.log("bonus animation end");
-	if (bonusDiv.className.includes("bonus-animation")) {
-		bonusDiv.classList.remove("bonus-animation");
-		bonusDiv.classList.add("fade");
-	} else {
-		bonusDiv.className = "animated-text hide";
-		bonusDiv.removeEventListener("animationend", bonusAnimationCall);
-	}
+	document.querySelector("#bonus").classList.add("bonus-animation");
 }
 
 function playerMove(dir) {
@@ -456,13 +458,6 @@ function playerReset() {
 			gameEventsCall ? gameEventsCall.pause() : "";
 			randomText.innerText = "";
 		}
-
-		// Stop Animations
-		stopAnimation("fade");
-		stopAnimation("animateMode");
-		stopAnimation("bonus-animation");
-		dangerDiv.classList.add("hide");
-		bonusDiv.classList.add("hide");
 
 		// Update High Score
 		let highScore = localStorage.getItem("tetrisHighScore");
@@ -494,13 +489,6 @@ function playerReset() {
 			"gameover-rows"
 		).innerText = `Rows Cleared: ${rowCount - 1}`;
 	}
-}
-
-function stopAnimation(cls) {
-	console.log(`stopping ${cls}`);
-	[...document.getElementsByClassName(cls)].forEach(item => {
-		item.classList.remove(cls);
-	});
 }
 
 function restartGame(val) {
@@ -763,15 +751,23 @@ let timer = function(callback, delay) {
 
 function getEvent() {
 	timerList = [];
-	const events = ["power-up", "grey-block", "score-plus", "speed-up"];
+	const events = [
+		"power-up",
+		"grey-block",
+		"score-plus",
+		"speed-up",
+		"grey-block"
+	];
 	let chosenEvent = events[random.integer(0, events.length)];
 
 	if (chosenEvent == "power-up") {
 		let sweepNumToAdd =
-			difficulty == "easy" || difficulty == "medium"
+			difficulty == "easy"
+				? 1
+				: difficulty == "medium"
 				? 2
 				: difficulty == "hard"
-				? 1
+				? 3
 				: "";
 		console.log("powerup");
 		randomText.innerText = "Power-Up!";
@@ -779,6 +775,10 @@ function getEvent() {
 		for (let i = 0; i < sweepNumToAdd; i++) {
 			addSweeper();
 		}
+	} else if (chosenEvent == "bomb") {
+		console.log("bomb");
+		randomText.innerText = "Bomb!";
+		randomDesc.innerText = "Blasting off some blocks!";
 	} else if (chosenEvent == "speed-up") {
 		console.log("speed-up");
 		randomText.innerText = "Speed-Up!";
@@ -858,6 +858,13 @@ function addGreyBlocks() {
 	let greyMatrix = Array(arena[0].length).fill(8);
 	arena.shift();
 	arena.push(greyMatrix);
+}
+
+function addBombPiece() {
+	// TODO
+	// Set range of X, and y value for drawing bomb
+	// Make bomb have additional gravity
+	// Check collision
 }
 
 function pauseUnpauseRandomInterval() {
