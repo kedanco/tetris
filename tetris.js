@@ -93,11 +93,10 @@ btnPause.addEventListener("click", e => pauseUnpauseGame());
 
 btnMute.addEventListener("click", e => pauseUnpauseMusic());
 
-btnMenus.forEach(item => {
-	item.addEventListener("click", e => {
-		toggleMenu();
-		restartGame("main");
-	});
+
+btnMenu.addEventListener("click", e => {
+	toggleMenu(false);
+	restartGame("main");
 });
 
 btnRestarts.forEach(item => {
@@ -142,14 +141,19 @@ function getDifficulty() {
 	[...document.getElementsByClassName("diff-buttons")].forEach(item => {
 		item.addEventListener("click", e => {
 			difficulty = e.target.value;
-			newGame = true;
-			toggleMenu();
+
+			toggleMenu(true);
+
 			startGame();
 		});
 	});
 }
 
-function toggleMenu() {
+
+function toggleMenu(newGame) {
+	//should only touch visual elements
+	console.log("toggle");
+
 	[...document.getElementsByClassName("gameItem")].forEach(item => {
 		item.classList.toggle("hide");
 	});
@@ -400,7 +404,9 @@ function streakCombo(st) {
 	player.score += comboScore;
 	console.log(`Streak: ${st}, ${comboScore} added!`);
 	document.querySelector("#bonus-score").innerText = comboScore;
-	requestAnimationFrame(update);
+
+	updateScore();
+
 
 	// Run Bonus Animation
 	bonusDiv.addEventListener("animationend", () => bonusAnimationCall());
