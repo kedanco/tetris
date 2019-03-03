@@ -136,6 +136,7 @@ function getDifficulty() {
 		item.addEventListener("click", e => {
 			difficulty = e.target.value;
 			toggleMenu(true);
+
 			startGame();
 		});
 	});
@@ -201,7 +202,8 @@ function startGame() {
 	update();
 }
 
-let pauseUnpauseGame = function(e) {
+
+let pauseUnpauseGame = function() {
 	if (difficulty == "hard") {
 		pauseUnpauseRandomInterval();
 	}
@@ -281,11 +283,29 @@ function collide(arena, player) {
 	for (let y = 0; y < m.length; y++) {
 		for (let x = 0; x < m[y].length; x++) {
 			if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
+				if (o.y < 6 && !danger) {
+					danger = true;
+					console.log("danger");
+					dangerDiv.classList.remove("hide");
+
+					dangerDiv.addEventListener("animationend", () => animateDangerCall());
+					dangerDiv.classList.add("animateDanger");
+				}
+				if (o.y > 6) {
+					console.log("no danger");
+					danger = false;
+				}
 				return true;
 			}
 		}
 	}
 	return false;
+}
+
+function animateDangerCall() {
+	dangerDiv.classList.remove("animateDanger");
+	dangerDiv.classList.add("fade");
+	dangerDiv.removeEventListener("animationend", animateDangerCall);
 }
 
 function createMatrix(w, h) {
@@ -395,8 +415,12 @@ function streakCombo(st) {
 	document.querySelector("#bonus-score").innerText = comboScore;
 	updateScore();
 
+	updateScore();
+
 	// Run Bonus Animation
-	bonusDiv.addEventListener("animationend", () => bonusAnimationCall());
+	document.querySelector("#bonus").addEventListener("animationend", () => {
+		console.log("event ended");
+	});
 
 	bonusDiv.classList.remove("hide");
 	// if (bonusDiv.className.includes('bonus-animation') || bonusDiv.className.includes('fade'))
@@ -406,15 +430,8 @@ function streakCombo(st) {
 	bonusDiv.classList.add("bonus-animation");
 }
 
-function bonusAnimationCall() {
-	console.log("bonus animation end");
-	if (bonusDiv.className.includes("bonus-animation")) {
-		bonusDiv.classList.remove("bonus-animation");
-		bonusDiv.classList.add("fade");
-	} else {
-		bonusDiv.className = "animated-text hide";
-		bonusDiv.removeEventListener("animationend", bonusAnimationCall);
-	}
+
+	document.querySelector("#bonus").classList.add("bonus-animation");
 }
 
 function playerMove(dir) {
@@ -442,8 +459,8 @@ function playerReset() {
 			gameEventsCall ? gameEventsCall.pause() : "";
 			randomText.innerText = "";
 		}
-
-		// Stop Animations
+    
+    // Stop Animations
 		stopAnimation("fade");
 		stopAnimation("animateMode");
 		stopAnimation("bonus-animation");
@@ -557,6 +574,7 @@ function rotate(matrix, dir) {
 function updateScore() {
 	document.getElementById("score").innerText = player.score;
 }
+
 
 function updateTime() {
 	// console.log("time");
@@ -742,15 +760,23 @@ let timer = function(callback, delay) {
 
 function getEvent() {
 	timerList = [];
-	const events = ["power-up", "grey-block", "score-plus", "speed-up"];
+	const events = [
+		"power-up",
+		"grey-block",
+		"score-plus",
+		"speed-up",
+		"grey-block"
+	];
 	let chosenEvent = events[random.integer(0, events.length)];
 
 	if (chosenEvent == "power-up") {
 		let sweepNumToAdd =
-			difficulty == "easy" || difficulty == "medium"
+			difficulty == "easy"
+				? 1
+				: difficulty == "medium"
 				? 2
 				: difficulty == "hard"
-				? 1
+				? 3
 				: "";
 		console.log("powerup");
 		randomText.innerText = "Power-Up!";
@@ -808,7 +834,7 @@ function animateToFade() {
 }
 
 function randomFade() {
-	console.log(`randomFade`);
+	// console.log(`randomFade`);
 	if (!gamePaused) {
 		randomText.removeEventListener(animationEvent, eventSetup, true);
 		setTimeout(() => {

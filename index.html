@@ -20,6 +20,10 @@
 		<div id="pause" class="overlay">
 			<h2 id="pause-title">Game Paused</h2>
 			<h4 id="pause-subtitle">Press any key to continue</h4>
+			<div id="pause-buttons">
+				<button class="btn-menu">Main Menu</button>
+				<button class="btn-restart">Restart</button>
+			</div>
 		</div>
 		<div id="gameover" class="overlay">
 			<div id="gameover-content">
@@ -28,13 +32,15 @@
 				<h4 id="gameover-time"></h4>
 				<h4 id="gameover-random"></h4>
 				<h4 id="gameover-rows"></h4>
+
 				<h4 id="gameover-streak"></h4>
 				<button id="btn-menu">Main Menu</button>
 				<button id="btn-restart">Restart</button>
+
 			</div>
 		</div>
 		<div id="bonus" class="animated-text hide">
-			<h2 id="bonus-combo"><span id="combo-number"></span>X Combo!</h2>
+			<h2 id="bonus-combo"><span id="combo-number"></span>Combo!</h2>
 			<p id="bonus-desc"><span id="bonus-score"></span> Added to your score!</p>
 		</div>
 		<div id="danger" class="animated-text hide">
@@ -76,7 +82,7 @@
 						<button id="btn-mute" class="settings-btn">Stop Music</button>
 					</div>
 				</div>
-				<div id="random-mode" class="hide">
+				<div id="random-mode">
 					<h3 id="random-title">
 						Random Mode
 						<a
