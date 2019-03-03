@@ -262,8 +262,17 @@ canvas {
 	top: 30%;
 }
 
-#btn-menu,
-#btn-restart {
+#pause-buttons {
+	display: block;
+	position: relative;
+	top: 30%;
+}
+
+.btn-menu,
+.btn-restart {
+	display: inline-block;
+	top: 40%;
+	position: relative;
 	padding: 15px;
 	margin: 30px;
 	font-size: 18px;

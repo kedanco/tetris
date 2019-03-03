@@ -23,15 +23,19 @@ const colors = [
 	"#888888"
 ];
 
+var globalTimeInterval;
+
 let difficulty = "easy",
 	gamePaused = true,
 	gameOver = false,
+	newGame = true,
 	musicPaused = false,
 	doNotSwitchMusic = 0,
 	timeCounter = 0,
 	rowCount = 1,
 	scoreMultiplier = 2,
 	streak = 0,
+	highestStreak = 0,
 	danger = false,
 	dropCounter = 0,
 	lastTime = 0,
@@ -50,8 +54,8 @@ let difficulty = "easy",
 	gameoverOverlay = document.getElementById("gameover"),
 	btnPause = document.getElementById("btn-pause"),
 	btnMute = document.getElementById("btn-mute"),
-	btnMenu = document.getElementById("btn-menu"),
-	btnRestart = document.getElementById("btn-restart"),
+	btnMenus = [...document.getElementsByClassName("btn-menu")],
+	btnRestarts = [...document.getElementsByClassName("btn-restart")],
 	sweeperDisplay = document.getElementById("sweeper-count"),
 	difficultyMenu = document.getElementById("difficulty"),
 	gameElements = document.getElementsByClassName("hide"),
@@ -89,13 +93,16 @@ btnPause.addEventListener("click", e => pauseUnpauseGame());
 
 btnMute.addEventListener("click", e => pauseUnpauseMusic());
 
+
 btnMenu.addEventListener("click", e => {
 	toggleMenu(false);
 	restartGame("main");
 });
 
-btnRestart.addEventListener("click", e => {
-	restartGame("restart");
+btnRestarts.forEach(item => {
+	item.addEventListener("click", e => {
+		restartGame("restart");
+	});
 });
 
 document.addEventListener("keydown", event => {
@@ -134,11 +141,14 @@ function getDifficulty() {
 	[...document.getElementsByClassName("diff-buttons")].forEach(item => {
 		item.addEventListener("click", e => {
 			difficulty = e.target.value;
+
 			toggleMenu(true);
+
 			startGame();
 		});
 	});
 }
+
 
 function toggleMenu(newGame) {
 	//should only touch visual elements
@@ -166,6 +176,11 @@ function toggleMenu(newGame) {
 }
 
 function startGame() {
+	gameOver = false;
+	newGame = false;
+	gamePaused = false;
+	player.sweeper = 0;
+	timeCounter = 0;
 	clickSound.currentTime = 0.2;
 	clickSound.play();
 	setTimeout(() => {
@@ -192,16 +207,12 @@ function startGame() {
 		randomEvents();
 	}
 
-	gameOver = false;
-	gamePaused = false;
-	player.sweeper = 0;
-	timeCounter = 0;
 	updateTime();
 	updateScore();
 	update();
 }
 
-let pauseUnpauseGame = function(e) {
+let pauseUnpauseGame = function() {
 	if (difficulty == "hard") {
 		pauseUnpauseRandomInterval();
 	}
@@ -267,7 +278,7 @@ function arenaSweep() {
 			player.score += (rowCount + rowAdder) * 10 * 2;
 			scorePlusOn = false;
 		}
-		rowAdder += scoreMultiplier;
+		rowAdder += scoreMultiplier / 2;
 		rowCount++;
 		rowCleared++;
 		// Interval of Sweeper Redemption follows scoreMultiplier
@@ -352,7 +363,6 @@ function merge(arena, player) {
 	});
 	if (player.pos.y < 6 && !danger) {
 		danger = true;
-		console.log("danger");
 		dangerDiv.className = "animated-text";
 
 		dangerDiv.addEventListener("animationend", () => animateDangerCall());
@@ -388,13 +398,15 @@ function playerDrop() {
 }
 
 function streakCombo(st) {
-	console.log(st);
+	highestStreak < st ? (highestStreak = st) : "";
 	document.querySelector("#combo-number").innerText = st;
 	let comboScore = Math.round((st * scoreInterval) / 2);
 	player.score += comboScore;
 	console.log(`Streak: ${st}, ${comboScore} added!`);
 	document.querySelector("#bonus-score").innerText = comboScore;
+
 	updateScore();
+
 
 	// Run Bonus Animation
 	bonusDiv.addEventListener("animationend", () => bonusAnimationCall());
@@ -492,6 +504,11 @@ function stopAnimation(cls) {
 }
 
 function restartGame(val) {
+	if (gamePaused) {
+		pauseUnpauseGame();
+	}
+	gameOver = true;
+	console.log("restarting game...");
 	arena.forEach(row => row.fill(0));
 	player.score = 0;
 	player.sweeper = 0;
@@ -502,21 +519,26 @@ function restartGame(val) {
 	document.querySelector("#danger").className = "animated-text hide";
 
 	document.getElementById("time").innerHTML = "0:00";
-	gameOver = false;
+	// gameOver = false;
 	if (val == "main") {
+		updateTime();
 		gamePaused = true;
 	} else {
 		gamePaused = false;
-		clearInterval(gameEventsInterval);
-		gameEventsInterval = 0;
-		startGame(difficulty);
-		if (gameEventsCall) {
-			gameEventsCall.pause();
-			gameEventsCall = null;
+		updateTime();
+		if (difficulty == "hard") {
+			clearInterval(gameEventsInterval);
+			gameEventsInterval = 0;
+			if (gameEventsCall) {
+				gameEventsCall.pause();
+				gameEventsCall = null;
+			}
 		}
+		startGame(difficulty);
 	}
 
 	gameoverOverlay.style.display = "none";
+	pauseOverlay.style.display = "none";
 }
 
 function playerRotate(dir) {
@@ -557,31 +579,32 @@ function updateScore() {
 }
 
 function updateTime() {
-	// console.log("time");
 	if (!gamePaused) {
 		let minutes,
 			seconds = 0;
 		document.getElementById("time").innerHTML = "0:00";
 
-		let x = setInterval(() => {
+		globalTimeInterval = setInterval(() => {
 			if (!gamePaused && !gameOver) {
 				timeCounter++;
 
 				minutes = Math.floor(timeCounter / 60);
 				seconds = Math.floor(timeCounter % 60);
-				// console.log(minutes, seconds);
 
 				if (seconds < 10) {
 					seconds = "0".concat(seconds);
 				}
 				document.getElementById("time").innerHTML = `${minutes}:${seconds}`;
 			} else if (gameOver) {
-				clearInterval(x);
+				console.log("clearing x internal");
+				clearInterval(globalTimeInterval);
 			}
 		}, 1000);
 	}
 	if (gameOver) {
 		console.log("Game over");
+		console.log("clearing x external");
+		clearInterval(globalTimeInterval);
 		timeCounter = 0;
 	}
 }
@@ -806,7 +829,7 @@ function animateToFade() {
 }
 
 function randomFade() {
-	console.log(`randomFade`);
+	// console.log(`randomFade`);
 	if (!gamePaused) {
 		randomText.removeEventListener(animationEvent, eventSetup, true);
 		setTimeout(() => {
