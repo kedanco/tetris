@@ -430,8 +430,15 @@ function streakCombo(st) {
 	bonusDiv.classList.add("bonus-animation");
 }
 
-
-	document.querySelector("#bonus").classList.add("bonus-animation");
+function bonusAnimationCall() {
+	console.log("bonus animation end");
+	if (bonusDiv.className.includes("bonus-animation")) {
+		bonusDiv.classList.remove("bonus-animation");
+		bonusDiv.classList.add("fade");
+	} else {
+		bonusDiv.className = "animated-text hide";
+		bonusDiv.removeEventListener("animationend", bonusAnimationCall);
+	}
 }
 
 function playerMove(dir) {
