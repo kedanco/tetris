@@ -23,12 +23,9 @@ const colors = [
 	"#888888"
 ];
 
-var globalTimeInterval;
-
 let difficulty = "easy",
 	gamePaused = true,
 	gameOver = false,
-	newGame = true,
 	musicPaused = false,
 	doNotSwitchMusic = 0,
 	timeCounter = 0,
@@ -54,8 +51,8 @@ let difficulty = "easy",
 	gameoverOverlay = document.getElementById("gameover"),
 	btnPause = document.getElementById("btn-pause"),
 	btnMute = document.getElementById("btn-mute"),
-	btnMenus = [...document.getElementsByClassName("btn-menu")],
-	btnRestarts = [...document.getElementsByClassName("btn-restart")],
+	btnMenu = document.getElementById("btn-menu"),
+	btnRestart = document.getElementById("btn-restart"),
 	sweeperDisplay = document.getElementById("sweeper-count"),
 	difficultyMenu = document.getElementById("difficulty"),
 	gameElements = document.getElementsByClassName("hide"),
@@ -98,10 +95,8 @@ btnMenu.addEventListener("click", e => {
 	restartGame("main");
 });
 
-btnRestarts.forEach(item => {
-	item.addEventListener("click", e => {
-		restartGame("restart");
-	});
+btnRestart.addEventListener("click", e => {
+	restartGame("restart");
 });
 
 document.addEventListener("keydown", event => {
@@ -140,7 +135,6 @@ function getDifficulty() {
 	[...document.getElementsByClassName("diff-buttons")].forEach(item => {
 		item.addEventListener("click", e => {
 			difficulty = e.target.value;
-
 			toggleMenu(true);
 
 			startGame();
@@ -150,7 +144,6 @@ function getDifficulty() {
 
 function toggleMenu(newGame) {
 	//should only touch visual elements
-	console.log("toggle");
 
 	[...document.getElementsByClassName("gameItem")].forEach(item => {
 		item.classList.toggle("hide");
@@ -174,11 +167,6 @@ function toggleMenu(newGame) {
 }
 
 function startGame() {
-	gameOver = false;
-	newGame = false;
-	gamePaused = false;
-	player.sweeper = 0;
-	timeCounter = 0;
 	clickSound.currentTime = 0.2;
 	clickSound.play();
 	setTimeout(() => {
@@ -205,10 +193,15 @@ function startGame() {
 		randomEvents();
 	}
 
+	gameOver = false;
+	gamePaused = false;
+	player.sweeper = 0;
+	timeCounter = 0;
 	updateTime();
 	updateScore();
 	update();
 }
+
 
 let pauseUnpauseGame = function() {
 	if (difficulty == "hard") {
@@ -420,6 +413,7 @@ function streakCombo(st) {
 	player.score += comboScore;
 	console.log(`Streak: ${st}, ${comboScore} added!`);
 	document.querySelector("#bonus-score").innerText = comboScore;
+	updateScore();
 
 	updateScore();
 
@@ -428,9 +422,23 @@ function streakCombo(st) {
 		console.log("event ended");
 	});
 
-	document.querySelector("#bonus").classList.toggle("hide");
+	bonusDiv.classList.remove("hide");
+	// if (bonusDiv.className.includes('bonus-animation') || bonusDiv.className.includes('fade'))
+	if ((bonusDiv.style.animationPlayState = "running")) {
+		bonusDiv.className = "animated-text";
+	}
+	bonusDiv.classList.add("bonus-animation");
+}
 
-	document.querySelector("#bonus").classList.add("bonus-animation");
+function bonusAnimationCall() {
+	console.log("bonus animation end");
+	if (bonusDiv.className.includes("bonus-animation")) {
+		bonusDiv.classList.remove("bonus-animation");
+		bonusDiv.classList.add("fade");
+	} else {
+		bonusDiv.className = "animated-text hide";
+		bonusDiv.removeEventListener("animationend", bonusAnimationCall);
+	}
 }
 
 function playerMove(dir) {
@@ -458,6 +466,13 @@ function playerReset() {
 			gameEventsCall ? gameEventsCall.pause() : "";
 			randomText.innerText = "";
 		}
+    
+    // Stop Animations
+		stopAnimation("fade");
+		stopAnimation("animateMode");
+		stopAnimation("bonus-animation");
+		dangerDiv.classList.add("hide");
+		bonusDiv.classList.add("hide");
 
 		// Update High Score
 		let highScore = localStorage.getItem("tetrisHighScore");
@@ -470,6 +485,7 @@ function playerReset() {
 			localStorage.setItem("tetrisHighScore", player.score);
 			localStorage.setItem("tetrisEndTime", timeCounter);
 			localStorage.setItem("tetrisRowCount", rowCount);
+			localStorage.setItem("tetrisStreak", highestStreak);
 		} else {
 			console.log("No records added.");
 		}
@@ -488,15 +504,20 @@ function playerReset() {
 		document.getElementById(
 			"gameover-rows"
 		).innerText = `Rows Cleared: ${rowCount - 1}`;
+		document.getElementById(
+			"gameover-streak"
+		).innerText = `Max Streak: ${highestStreak}`;
 	}
 }
 
+function stopAnimation(cls) {
+	console.log(`stopping ${cls}`);
+	[...document.getElementsByClassName(cls)].forEach(item => {
+		item.classList.remove(cls);
+	});
+}
+
 function restartGame(val) {
-	if (gamePaused) {
-		pauseUnpauseGame();
-	}
-	gameOver = true;
-	console.log("restarting game...");
 	arena.forEach(row => row.fill(0));
 	player.score = 0;
 	player.sweeper = 0;
@@ -507,26 +528,21 @@ function restartGame(val) {
 	document.querySelector("#danger").className = "animated-text hide";
 
 	document.getElementById("time").innerHTML = "0:00";
-	// gameOver = false;
+	gameOver = false;
 	if (val == "main") {
-		updateTime();
 		gamePaused = true;
 	} else {
 		gamePaused = false;
-		updateTime();
-		if (difficulty == "hard") {
-			clearInterval(gameEventsInterval);
-			gameEventsInterval = 0;
-			if (gameEventsCall) {
-				gameEventsCall.pause();
-				gameEventsCall = null;
-			}
-		}
+		clearInterval(gameEventsInterval);
+		gameEventsInterval = 0;
 		startGame(difficulty);
+		if (gameEventsCall) {
+			gameEventsCall.pause();
+			gameEventsCall = null;
+		}
 	}
 
 	gameoverOverlay.style.display = "none";
-	pauseOverlay.style.display = "none";
 }
 
 function playerRotate(dir) {
@@ -566,33 +582,33 @@ function updateScore() {
 	document.getElementById("score").innerText = player.score;
 }
 
+
 function updateTime() {
+	// console.log("time");
 	if (!gamePaused) {
 		let minutes,
 			seconds = 0;
 		document.getElementById("time").innerHTML = "0:00";
 
-		globalTimeInterval = setInterval(() => {
+		let x = setInterval(() => {
 			if (!gamePaused && !gameOver) {
 				timeCounter++;
 
 				minutes = Math.floor(timeCounter / 60);
 				seconds = Math.floor(timeCounter % 60);
+				// console.log(minutes, seconds);
 
 				if (seconds < 10) {
 					seconds = "0".concat(seconds);
 				}
 				document.getElementById("time").innerHTML = `${minutes}:${seconds}`;
 			} else if (gameOver) {
-				console.log("clearing x internal");
-				clearInterval(globalTimeInterval);
+				clearInterval(x);
 			}
 		}, 1000);
 	}
 	if (gameOver) {
 		console.log("Game over");
-		console.log("clearing x external");
-		clearInterval(globalTimeInterval);
 		timeCounter = 0;
 	}
 }
@@ -775,10 +791,6 @@ function getEvent() {
 		for (let i = 0; i < sweepNumToAdd; i++) {
 			addSweeper();
 		}
-	} else if (chosenEvent == "bomb") {
-		console.log("bomb");
-		randomText.innerText = "Bomb!";
-		randomDesc.innerText = "Blasting off some blocks!";
 	} else if (chosenEvent == "speed-up") {
 		console.log("speed-up");
 		randomText.innerText = "Speed-Up!";
@@ -858,13 +870,6 @@ function addGreyBlocks() {
 	let greyMatrix = Array(arena[0].length).fill(8);
 	arena.shift();
 	arena.push(greyMatrix);
-}
-
-function addBombPiece() {
-	// TODO
-	// Set range of X, and y value for drawing bomb
-	// Make bomb have additional gravity
-	// Check collision
 }
 
 function pauseUnpauseRandomInterval() {
