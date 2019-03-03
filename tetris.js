@@ -90,8 +90,8 @@ btnPause.addEventListener("click", e => pauseUnpauseGame());
 btnMute.addEventListener("click", e => pauseUnpauseMusic());
 
 btnMenu.addEventListener("click", e => {
+	toggleMenu(false);
 	restartGame("main");
-	toggleMenu();
 });
 
 btnRestart.addEventListener("click", e => {
@@ -134,13 +134,13 @@ function getDifficulty() {
 	[...document.getElementsByClassName("diff-buttons")].forEach(item => {
 		item.addEventListener("click", e => {
 			difficulty = e.target.value;
-			toggleMenu();
+			toggleMenu(true);
 			startGame();
 		});
 	});
 }
 
-function toggleMenu() {
+function toggleMenu(newGame) {
 	//should only touch visual elements
 	console.log("toggle");
 
@@ -148,18 +148,20 @@ function toggleMenu() {
 		item.classList.toggle("hide");
 	});
 
-	let diffButton = document.getElementById("display-difficulty");
+	if (newGame) {
+		let diffButton = document.getElementById("display-difficulty");
 
-	if (difficulty == "easy") {
-		diffButton.innerText = "EASY";
-		diffButton.className = "easy";
-	} else if (difficulty == "medium") {
-		diffButton.innerText = "MEDIUM";
-		diffButton.className = "medium";
-	} else if (difficulty == "hard") {
-		document.querySelector("#random-mode").classList.toggle("hide");
-		diffButton.innerText = "HARD";
-		diffButton.className = "hard";
+		if (difficulty == "easy") {
+			diffButton.innerText = "EASY";
+			diffButton.className = "gameItem easy";
+		} else if (difficulty == "medium") {
+			diffButton.innerText = "MEDIUM";
+			diffButton.className = "gameItem medium";
+		} else if (difficulty == "hard") {
+			document.querySelector("#random-mode").classList.toggle("hide");
+			diffButton.innerText = "HARD";
+			diffButton.className = "gameItem hard";
+		}
 	}
 }
 
@@ -392,6 +394,7 @@ function streakCombo(st) {
 	player.score += comboScore;
 	console.log(`Streak: ${st}, ${comboScore} added!`);
 	document.querySelector("#bonus-score").innerText = comboScore;
+	updateScore();
 
 	// Run Bonus Animation
 	bonusDiv.addEventListener("animationend", () => bonusAnimationCall());
