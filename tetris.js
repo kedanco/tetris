@@ -202,7 +202,6 @@ function startGame() {
 	update();
 }
 
-
 let pauseUnpauseGame = function() {
 	if (difficulty == "hard") {
 		pauseUnpauseRandomInterval();
@@ -283,18 +282,6 @@ function collide(arena, player) {
 	for (let y = 0; y < m.length; y++) {
 		for (let x = 0; x < m[y].length; x++) {
 			if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
-				if (o.y < 6 && !danger) {
-					danger = true;
-					console.log("danger");
-					dangerDiv.classList.remove("hide");
-
-					dangerDiv.addEventListener("animationend", () => animateDangerCall());
-					dangerDiv.classList.add("animateDanger");
-				}
-				if (o.y > 6) {
-					console.log("no danger");
-					danger = false;
-				}
 				return true;
 			}
 		}
@@ -303,7 +290,7 @@ function collide(arena, player) {
 }
 
 function animateDangerCall() {
-	dangerDiv.classList.remove("animateDanger");
+	dangerDiv.classList.remove("animateMode");
 	dangerDiv.classList.add("fade");
 	dangerDiv.removeEventListener("animationend", animateDangerCall);
 }
@@ -466,8 +453,8 @@ function playerReset() {
 			gameEventsCall ? gameEventsCall.pause() : "";
 			randomText.innerText = "";
 		}
-    
-    // Stop Animations
+
+		// Stop Animations
 		stopAnimation("fade");
 		stopAnimation("animateMode");
 		stopAnimation("bonus-animation");
@@ -581,7 +568,6 @@ function rotate(matrix, dir) {
 function updateScore() {
 	document.getElementById("score").innerText = player.score;
 }
-
 
 function updateTime() {
 	// console.log("time");
@@ -767,23 +753,15 @@ let timer = function(callback, delay) {
 
 function getEvent() {
 	timerList = [];
-	const events = [
-		"power-up",
-		"grey-block",
-		"score-plus",
-		"speed-up",
-		"grey-block"
-	];
+	const events = ["power-up", "score-plus", "speed-up", "grey-block"];
 	let chosenEvent = events[random.integer(0, events.length)];
 
 	if (chosenEvent == "power-up") {
 		let sweepNumToAdd =
-			difficulty == "easy"
-				? 1
-				: difficulty == "medium"
+			difficulty == "easy" || difficulty == "medium"
 				? 2
 				: difficulty == "hard"
-				? 3
+				? 1
 				: "";
 		console.log("powerup");
 		randomText.innerText = "Power-Up!";

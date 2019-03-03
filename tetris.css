@@ -286,13 +286,16 @@ canvas {
 }
 
 #bonus {
-	top: 10%;
-	color: white;
+	top: 22%;
+	line-height: 0.5em;
+	font-size: 0.8em;
+	color: #9c27b0;
+	text-shadow: -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white,
+		1px 1px 0 white;
 }
 
 #danger {
 	top: 17%;
-	/* color: maroon; */
 	opacity: 0.8;
 	font-size: 1.2em;
 }
@@ -339,10 +342,6 @@ canvas {
 	color: #666;
 }
 
-.bomb {
-	color: red;
-}
-
 .power-up {
 	color: yellow;
 }
@@ -353,10 +352,6 @@ canvas {
 
 .animateMode {
 	animation: 0.3s linear 0.5s 10 alternate backwards flashfade;
-}
-
-.animateDanger {
-	animation: 0.3s linear 0.5s 8 alternate backwards flashfade;
 }
 
 .fade {
