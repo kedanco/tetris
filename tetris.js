@@ -33,6 +33,7 @@ let difficulty = "easy",
 	scoreMultiplier = 2,
 	streak = 0,
 	highestStreak = 0,
+	modeScore = {},
 	danger = false,
 	dropCounter = 0,
 	lastTime = 0,
@@ -405,12 +406,12 @@ function streakCombo(st) {
 	updateScore();
 
 	// Run Bonus Animation
-	document.querySelector("#bonus").addEventListener("animationend", () => {
-		console.log("event ended");
+	bonusDiv.addEventListener("animationend", () => {
+		bonusAnimationCall();
 	});
 
 	bonusDiv.classList.remove("hide");
-	// if (bonusDiv.className.includes('bonus-animation') || bonusDiv.className.includes('fade'))
+
 	if ((bonusDiv.style.animationPlayState = "running")) {
 		bonusDiv.className = "animated-text";
 	}
@@ -463,16 +464,30 @@ function playerReset() {
 
 		// Update High Score
 		let highScore = localStorage.getItem("tetrisHighScore");
+		let num = difficulty == "easy" ? 0 : difficulty == "medium" ? 1 : 2;
 
 		if (!highScore) {
-			highScore = 0;
+			highScore = ["", "", ""];
+			modeScore = { score: 0 };
+			console.log("fresh record");
+		} else if (highScore && !highScore[num]) {
+			modeScore = { score: 0 };
+		} else {
+			modeScore = highScore[num];
 		}
-		if (player.score > highScore) {
+		if (player.score > modeScore.score) {
 			console.log("setting high score");
-			localStorage.setItem("tetrisHighScore", player.score);
-			localStorage.setItem("tetrisEndTime", timeCounter);
-			localStorage.setItem("tetrisRowCount", rowCount);
-			localStorage.setItem("tetrisStreak", highestStreak);
+			modeScore = {
+				difficulty: difficulty,
+				score: player.score,
+				endTime: timeCounter,
+				rowCount: rowCount,
+				streak: highestStreak
+			};
+
+			highScore[num] = modeScore;
+
+			localStorage.setItem("tetrisHighScore", highScore);
 		} else {
 			console.log("No records added.");
 		}
@@ -486,14 +501,17 @@ function playerReset() {
 			"gameover-time"
 		).innerText = `Final Time: ${timeCounter}`;
 		document.getElementById(
-			"gameover-random"
-		).innerText = `Random Events: ${randomCount}`;
-		document.getElementById(
 			"gameover-rows"
 		).innerText = `Rows Cleared: ${rowCount - 1}`;
 		document.getElementById(
 			"gameover-streak"
 		).innerText = `Max Streak: ${highestStreak}`;
+
+		if (difficulty == "hard") {
+			document.getElementById(
+				"gameover-random"
+			).innerText = `Random Events: ${randomCount}`;
+		}
 	}
 }
 

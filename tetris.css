@@ -168,6 +168,14 @@ h4 {
 	grid-column: 1/2;
 }
 
+#highscore {
+	display: grid;
+	grid-row: 2/3;
+}
+
+#highscore h4 {
+}
+
 .tooltip {
 	position: relative;
 	top: -2px;
@@ -268,8 +276,8 @@ canvas {
 	top: 30%;
 }
 
-.btn-menu,
-.btn-restart {
+#btn-menu,
+#btn-restart {
 	display: inline-block;
 	top: 40%;
 	position: relative;
