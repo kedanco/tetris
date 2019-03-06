@@ -22,5 +22,5 @@ Initial Game completed following **Meth Meth Method**'s tutorial on Youtube:
 - [x] Danger Animation
 - [x] Combo Bonus Animation
 - [x] Display Previous High Score
-- [ ] Next Block Display
+- [x] Next Block Display
 - [ ] Code Refactor with random.js

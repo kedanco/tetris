@@ -230,13 +230,22 @@ h4 {
 	margin: 5px;
 }
 
-canvas {
+#tetris {
 	display: grid;
 	grid-row: 2/3;
 	grid-column: 2/3;
 	justify-self: center;
 	border: solid 0.2em #fff;
 	height: 65vh;
+}
+
+#next-block {
+	margin-top: 10px;
+}
+
+#block-title {
+	font-size: 24px;
+	margin: 10px 0px;
 }
 
 .hide {

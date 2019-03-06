@@ -4,6 +4,10 @@ const canvas = document.getElementById("tetris");
 const context = canvas.getContext("2d");
 context.scale(20, 20);
 
+const nextBlockCanvas = document.getElementById("block-canvas");
+const nbCtx = nextBlockCanvas.getContext("2d");
+nbCtx.scale(25, 25);
+
 const eventMinInterval = 18000; //30 secs min interval
 const minDelay = 1000;
 const maxDelay = 5000; //80 secs max interval
@@ -20,7 +24,8 @@ const colors = [
 	"#FF8E0D",
 	"#FFE138",
 	"#3877FF",
-	"#888888"
+	"#888888",
+	"#12e6c9"
 ];
 
 let difficulty = "easy",
@@ -32,6 +37,7 @@ let difficulty = "easy",
 	rowCount = 1,
 	scoreMultiplier = 2,
 	streak = 0,
+	minStreak = 2,
 	highestStreak = 0,
 	modeScore = {},
 	danger = false,
@@ -76,14 +82,14 @@ let gameOverMusic = new Audio(
 
 getDifficulty();
 
-const arena = createMatrix(12, 20);
+const arena = createMatrix(12, 20, 0);
+const nextBlock = createMatrix(6, 6, 9);
 
 const player = {
 	pos: { x: 5, y: 5 },
 	matrix: createPiece(pieces[(pieces.length * Math.random()) | 0]),
 	score: 0,
-	sweeper: 0,
-	name: ""
+	sweeper: 0
 };
 
 btnPause.addEventListener("click", e => pauseUnpauseGame());
@@ -194,6 +200,7 @@ function startGame() {
 	}
 
 	populateHighscore();
+	displayNextBlock();
 
 	gameOver = false;
 	gamePaused = false;
@@ -320,10 +327,10 @@ function animateDangerCall() {
 	dangerDiv.removeEventListener("animationend", animateDangerCall);
 }
 
-function createMatrix(w, h) {
+function createMatrix(w, h, num) {
 	const matrix = [];
 	while (h--) {
-		matrix.push(new Array(w).fill(0));
+		matrix.push(new Array(w).fill(num));
 	}
 	return matrix;
 }
@@ -349,25 +356,25 @@ function createPiece(type) {
 function draw() {
 	context.fillStyle = "#000";
 	context.fillRect(0, 0, canvas.width, canvas.height);
-	drawMatrix(arena, { x: 0, y: 0 });
-	drawMatrix(player.matrix, player.pos);
+	drawMatrix(arena, { x: 0, y: 0 }, context);
+	drawMatrix(player.matrix, player.pos, context);
 }
 
-function drawMatrix(matrix, offset) {
+function drawMatrix(matrix, offset, ctx) {
 	matrix.forEach((row, y) => {
 		row.forEach((value, x) => {
 			// if (value !== 0) {
 			if (value !== 0 && value !== 8) {
-				context.fillStyle = colors[value];
-				context.fillRect(x + offset.x, y + offset.y, 1, 1);
+				ctx.fillStyle = colors[value];
+				ctx.fillRect(x + offset.x, y + offset.y, 1, 1);
 			}
 			// Add stroke for greyblocks
 			if (value === 8) {
-				context.fillStyle = colors[value];
-				context.fillRect(x + offset.x, y + offset.y, 1, 1);
-				context.strokeStyle = "black";
-				context.lineWidth = 0.03;
-				context.strokeRect(x + offset.x, y + offset.y, 1, 1);
+				ctx.fillStyle = colors[value];
+				ctx.fillRect(x + offset.x, y + offset.y, 1, 1);
+				ctx.strokeStyle = "black";
+				ctx.lineWidth = 0.03;
+				ctx.strokeRect(x + offset.x, y + offset.y, 1, 1);
 			}
 		});
 	});
@@ -413,7 +420,7 @@ function playerDrop() {
 		updateScore();
 
 		rowCleared > 0 ? (streak += rowCleared) : (streak = 0);
-		if (streak > 1) streakCombo(streak);
+		if (streak > minStreak) streakCombo(streak);
 	}
 	dropCounter = 0;
 }
@@ -425,8 +432,6 @@ function streakCombo(st) {
 	player.score += comboScore;
 	console.log(`Streak: ${st}, ${comboScore} added!`);
 	document.querySelector("#bonus-score").innerText = comboScore;
-	updateScore();
-
 	updateScore();
 
 	// Run Bonus Animation
@@ -461,7 +466,8 @@ function playerMove(dir) {
 }
 
 function playerReset() {
-	player.matrix = createPiece(pieces[(pieces.length * Math.random()) | 0]);
+	player.matrix = player.nextBlock;
+	displayNextBlock();
 	player.pos.y = 0;
 	player.pos.x =
 		((arena[0].length / 2) | 0) - ((player.matrix[0].length / 2) | 0);
@@ -641,6 +647,23 @@ function updateTime() {
 		console.log("Game over");
 		timeCounter = 0;
 	}
+}
+
+// Display Next Block
+// ==================================
+
+function displayNextBlock() {
+	console.log("displaying next block");
+	player.nextBlock = createPiece(pieces[(pieces.length * Math.random()) | 0]);
+
+	// Draw with nbCtx
+	// nbCtx.fillStyle = document.querySelector("body").style.backgroundColor;
+	// nbCtx.fillStyle = "#000";
+	// nbCtx.fillRect(0, 0, nextBlockCanvas.width, nextBlockCanvas.height);
+	drawMatrix(nextBlock, { x: 0, y: 0 }, nbCtx);
+	let offsetX =
+		((nextBlock[0].length / 2) | 0) - ((player.nextBlock[0].length / 2) | 0);
+	drawMatrix(player.nextBlock, { x: offsetX, y: 0 }, nbCtx);
 }
 
 // Sweepers
