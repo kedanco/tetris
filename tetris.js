@@ -76,15 +76,14 @@ let gameOverMusic = new Audio(
 
 getDifficulty();
 
-// let dropInterval be determined by difficulty
-
 const arena = createMatrix(12, 20);
 
 const player = {
 	pos: { x: 5, y: 5 },
 	matrix: createPiece(pieces[(pieces.length * Math.random()) | 0]),
 	score: 0,
-	sweeper: 0
+	sweeper: 0,
+	name: ""
 };
 
 btnPause.addEventListener("click", e => pauseUnpauseGame());
@@ -194,6 +193,8 @@ function startGame() {
 		randomEvents();
 	}
 
+	populateHighscore();
+
 	gameOver = false;
 	gamePaused = false;
 	player.sweeper = 0;
@@ -201,6 +202,29 @@ function startGame() {
 	updateTime();
 	updateScore();
 	update();
+}
+
+function populateHighscore() {
+	let highscore = JSON.parse(localStorage.getItem("tetrisHighScore"));
+
+	if (highscore && highscore[difficulty]) {
+		document.querySelector("#highscore-date").innerHTML = `<b>Ranked on: </b> 
+			${highscore[difficulty].date}`;
+		document.querySelector("#highscore-score").innerHTML = `<b>Score: </b> 
+			${highscore[difficulty].score}`;
+		document.querySelector(
+			"#highscore-time"
+		).innerHTML = `<b>Time Elapsed: </b> ${highscore[difficulty].endTime}`;
+		document.querySelector(
+			"#highscore-rows"
+		).innerHTML = `<b>Rows Cleared: </b> ${highscore[difficulty].rowCount}`;
+		document.querySelector(
+			"#highscore-streak"
+		).innerHTML = `<b>Highest Streak: </b> ${highscore[difficulty].streak}`;
+	} else {
+		document.querySelector("#highscore-score").innerText =
+			"No Highscore has been set.";
+	}
 }
 
 let pauseUnpauseGame = function() {
@@ -463,31 +487,33 @@ function playerReset() {
 		bonusDiv.classList.add("hide");
 
 		// Update High Score
-		let highScore = localStorage.getItem("tetrisHighScore");
-		let num = difficulty == "easy" ? 0 : difficulty == "medium" ? 1 : 2;
+		let highScore = JSON.parse(localStorage.getItem("tetrisHighScore"));
 
 		if (!highScore) {
-			highScore = ["", "", ""];
+			highScore = {};
 			modeScore = { score: 0 };
 			console.log("fresh record");
-		} else if (highScore && !highScore[num]) {
+		} else if (highScore && !highScore[difficulty]) {
 			modeScore = { score: 0 };
 		} else {
-			modeScore = highScore[num];
+			modeScore = highScore[difficulty];
 		}
 		if (player.score > modeScore.score) {
 			console.log("setting high score");
+
+			let scoreDate = new Date(Date.now()).toLocaleDateString();
+
 			modeScore = {
-				difficulty: difficulty,
+				date: scoreDate,
 				score: player.score,
 				endTime: timeCounter,
 				rowCount: rowCount,
 				streak: highestStreak
 			};
 
-			highScore[num] = modeScore;
+			highScore[difficulty] = modeScore;
 
-			localStorage.setItem("tetrisHighScore", highScore);
+			localStorage.setItem("tetrisHighScore", JSON.stringify(highScore));
 		} else {
 			console.log("No records added.");
 		}
