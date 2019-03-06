@@ -166,6 +166,7 @@ function toggleMenu(newGame) {
 			diffButton.className = "gameItem medium";
 		} else if (difficulty == "hard") {
 			document.querySelector("#random-mode").classList.toggle("hide");
+			document.querySelector("#next-block").classList.toggle("hide");
 			diffButton.innerText = "HARD";
 			diffButton.className = "gameItem hard";
 		}
@@ -466,8 +467,12 @@ function playerMove(dir) {
 }
 
 function playerReset() {
-	player.matrix = player.nextBlock;
-	displayNextBlock();
+	if (difficulty !== "hard") {
+		player.matrix = player.nextBlock;
+		displayNextBlock();
+	} else {
+		player.matrix = createPiece(pieces[(pieces.length * Math.random()) | 0]);
+	}
 	player.pos.y = 0;
 	player.pos.x =
 		((arena[0].length / 2) | 0) - ((player.matrix[0].length / 2) | 0);
@@ -531,7 +536,7 @@ function playerReset() {
 		}`;
 		document.getElementById(
 			"gameover-time"
-		).innerText = `Final Time: ${timeCounter}`;
+		).innerText = `Time Elapsed: ${timeCounter}`;
 		document.getElementById(
 			"gameover-rows"
 		).innerText = `Rows Cleared: ${rowCount - 1}`;
@@ -653,17 +658,18 @@ function updateTime() {
 // ==================================
 
 function displayNextBlock() {
-	console.log("displaying next block");
-	player.nextBlock = createPiece(pieces[(pieces.length * Math.random()) | 0]);
+	if (difficulty !== "hard") {
+		player.nextBlock = createPiece(pieces[(pieces.length * Math.random()) | 0]);
 
-	// Draw with nbCtx
-	// nbCtx.fillStyle = document.querySelector("body").style.backgroundColor;
-	// nbCtx.fillStyle = "#000";
-	// nbCtx.fillRect(0, 0, nextBlockCanvas.width, nextBlockCanvas.height);
-	drawMatrix(nextBlock, { x: 0, y: 0 }, nbCtx);
-	let offsetX =
-		((nextBlock[0].length / 2) | 0) - ((player.nextBlock[0].length / 2) | 0);
-	drawMatrix(player.nextBlock, { x: offsetX, y: 0 }, nbCtx);
+		// Draw with nbCtx
+		// nbCtx.fillStyle = document.querySelector("body").style.backgroundColor;
+		// nbCtx.fillStyle = "#000";
+		// nbCtx.fillRect(0, 0, nextBlockCanvas.width, nextBlockCanvas.height);
+		drawMatrix(nextBlock, { x: 0, y: 0 }, nbCtx);
+		let offsetX =
+			((nextBlock[0].length / 2) | 0) - ((player.nextBlock[0].length / 2) | 0);
+		drawMatrix(player.nextBlock, { x: offsetX, y: 0 }, nbCtx);
+	}
 }
 
 // Sweepers
